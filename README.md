@@ -1,8 +1,15 @@
 <div align="center">
-# GPT3-QQRobot
-✨ 基于openai GPT3官方API和go-cqhttp的聊天机器人✨
+
+![ico](https://user-images.githubusercontent.com/25968335/120111974-8abef880-c139-11eb-99cd-fa928348b198.png)
 </div>
-## 功能
+
+<div align="center">
+
+# GPT3-QQRobot 
+_✨ 基于openai GPT3官方API和go-cqhttp的聊天机器人✨_
+</div>
+
+## 💥功能  
 - [x] docker一键部署
 - [x] 连续对话（三种对话模式）
 - [x] 人格设置
@@ -18,9 +25,9 @@
 - [ ] 回答图片渲染（待开发）
 - [ ] 管理员功能和权限（待开发）
 
-## 使用说明
+## 🚀使用教程
 ### 1. 注册
-注册OpenAI账号，获取API Key[具体教程](https://beta.openai.com/account/api-keys)。
+注册OpenAI账号，获取API Key [具体教程](https://beta.openai.com/account/api-keys)。
 ### 2. 部署
 #### 2.1. 部署go-cqhttp
 详细安装方法请参考 [go-cqhttp文档](https://docs.go-cqhttp.org/)  
@@ -32,14 +39,14 @@
 ### 3. 配置
 [配置说明](./docs/config.md)（看不懂可以跳过）
 ### 4. 使用
-\#gpt help查看全部命令
-\#gpt begin开始对话
-\#gpt end结束对话
-更多用法请通过help命令查看
-默认群聊模式为派对模式，同一群聊内的所有人共享一个对话状态
+\#gpt help查看全部命令  
+\#gpt begin开始对话  
+\#gpt end结束对话  
+更多用法请通过help命令查看  
+默认群聊模式为派对模式，同一群聊内的所有人共享一个对话状态  
 默认配置下群聊需要@机器人才能触发对话（每次对话都需要），但是命令不需要@（加上也不影响）
-### 5. 实际效果
-#### 群聊
+## ✨实际效果
+### 群聊
 ![群聊](./docs/images/group.png)
-#### 私聊
+### 私聊
 ![私聊](./docs/images/private.png)

@@ -1,0 +1,15 @@
+export const CONSTANT = {
+    DEFAULT_MAX_TOKENS: 400,
+    DEFAULT_MAX_PROMPTS: 600,
+    DEFAULT_TEMPERATURE: 0.6,
+    DEFAULT_TOP_P: 1,
+    DEFAULT_FREQUENCY_PENALTY: 0,
+    DEFAULT_PRESENCE_PENALTY: 0.6,
+    DEFAULT_MODE: 'pop_front',
+    DEFAULT_PREFIX: 'The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.',
+    DEFAULT_NAMES: ['Human', 'AI'],
+    DEFAULT_MAX_USER_CACHE: 200,
+    COMMAND_PREFIX: '#gpt ',
+    GROUP_MODE: 'party',
+    AT_MODE: 'message',
+}

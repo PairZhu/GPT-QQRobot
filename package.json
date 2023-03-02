@@ -1,0 +1,22 @@
+{
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main"
+  },
+  "dependencies": {
+    "@nestjs/cli": "^9.2.0",
+    "dotenv": "^16.0.3",
+    "log4js": "^6.7.1",
+    "lowdb": "^4.0.0",
+    "lru-cache": "^7.16.0",
+    "node-fetch": "^3.3.0",
+    "openai": "^3.1.0",
+    "ws": "^8.12.1"
+  }
+}

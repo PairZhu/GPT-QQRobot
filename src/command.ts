@@ -232,7 +232,7 @@ export const commandList: Array<Command> = [
             user.setPrefix(prefix);
             return `对话人设已设置为：${prefix}`;
         },
-        help: `prefix [人设]: 设置对话人设，将在新创建的对话中生效，例如: ${CONSTANT.COMMAND_PREFIX}prefix AI助理乐于助人、富有创意、聪明而且非常友好。\n以下是人类与AI助手的对话。`
+        help: `char [人设]: 设置对话人设，将在新创建的对话中生效，例如: ${CONSTANT.COMMAND_PREFIX}char ${CONSTANT.DEFAULT_PREFIX}`
     },
     {
         name: 'history',

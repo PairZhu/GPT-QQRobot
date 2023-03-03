@@ -28,7 +28,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 
 ## 🚀使用教程
 ### 1. 注册
-注册OpenAI账号，获取API Key [具体教程](https://beta.openai.com/account/api-keys)。
+注册OpenAI账号，获取API Key [具体教程](./docs/register.md)。
 ### 2. 部署
 #### 2.1. 部署go-cqhttp
 详细安装方法请参考 [go-cqhttp文档](https://docs.go-cqhttp.org/)  

@@ -21,7 +21,7 @@ async function preparedUser(userId: string): Promise<User> {
 }
 
 const conversation2String = (conversation: Conversation) => (
-    conversation.prefix + conversation.data.map((cur) => (`user: ${cur[0]}\nassistant: ${cur[1]}`)).join('\n')
+    conversation.prefix+ '\n' + conversation.data.map((cur) => (`user: ${cur[0]}\nassistant: ${cur[1]}`)).join('\n')
 );
 
 export const commandList: Array<Command> = [
@@ -103,7 +103,7 @@ export const commandList: Array<Command> = [
                 return `序号超出范围，输入${CONSTANT.COMMAND_PREFIX}list查看存档列表`;
             }
             const conversation = conversationList[index - 1];
-            return `title: ${conversation.title}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}\n\n`+ conversation2String(conversation);
+            return `标题: ${conversation.title}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}\n\n`+ conversation2String(conversation);
         },
         argNums: new Set([0, 1]),
         help: `list [序号(可选)]: 指定序号可显示对应对话的内容，例如: ${CONSTANT.COMMAND_PREFIX}list 1\n不指定则显示存档列表`
@@ -167,7 +167,7 @@ export const commandList: Array<Command> = [
             return res;
         },
         argNums: new Set([0]),
-        help: `显示当前用户和对话信息，其中temperature、top_p、frequency_penalty、presence_penalty分别对应GPT的四个参数，具体含义请参考OpenAI官网的文档，对话模式的含义请使用命令${CONSTANT.COMMAND_PREFIX}help mode查看`
+        help: `显示当前用户和对话信息，其中temperature、top_p、frequency_penalty、presence_penalty分别对应GPT的四个参数，具体含义请参考OpenAI官网的文档 https://platform.openai.com/docs/api-reference/chat/create ，对话模式的含义请使用命令${CONSTANT.COMMAND_PREFIX}help mode查看`
     },
     {
         name: 'retry',
@@ -264,7 +264,7 @@ export const commandList: Array<Command> = [
             return `参数${paramName}已设置为${paramValue}`;
         },
         argNums: new Set([2]),
-        help: `param [参数名] [参数值]: 设置对话参数，例如: ${CONSTANT.COMMAND_PREFIX}param temperature 0.8\n设置的参数将在新创建的对话中生效\n支持的参数名有:temperature、top_p、frequency_penalty、presence_penalty\n参数的具体含义请参考OpenAI官网的文档`
+        help: `param [参数名] [参数值]: 设置对话参数，例如: ${CONSTANT.COMMAND_PREFIX}param temperature 0.8\n设置的参数将在新创建的对话中生效\n支持的参数名有:temperature、top_p、frequency_penalty、presence_penalty\n参数的具体含义请参考OpenAI官网的文档 https://platform.openai.com/docs/api-reference/chat/create`
     },
     {
         name: 'share',

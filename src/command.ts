@@ -1,5 +1,5 @@
 import { CONSTANT } from "./utils/constant.js";
-import { User, conversation2String, Mode } from "./user.js";
+import { User, Mode, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
 
 export interface Command {
@@ -13,12 +13,16 @@ export interface Command {
 async function preparedUser(userId: string): Promise<User> {
     let user = global.userCache.get(userId);
     if (!user) {
-        user = new User(userId, global.gpt3);
+        user = new User(userId, global.gpt);
         await user.init();
         global.userCache.set(userId, user);
     }
     return user;
 }
+
+const conversation2String = (conversation: Conversation) => (
+    conversation.prefix + conversation.data.map((cur) => (`user: ${cur[0]}\nassistant: ${cur[1]}`)).join('\n')
+);
 
 export const commandList: Array<Command> = [
     {
@@ -122,7 +126,7 @@ export const commandList: Array<Command> = [
             if(!global.chattingUsers.has(userId)) {
                 global.chattingUsers.add(userId);
             }
-            return `已加载存档${conversation.title}，对话已开启`;
+            return `已加载存档"${conversation.title}"，对话已开启`;
         },
         argNums: new Set([1]),
         help: `load [序号]: 加载序号对应的对话存档，例如: ${CONSTANT.COMMAND_PREFIX}load 1\n加载后当前对话会丢失，并且载入对话不会覆盖原来的存档（可以理解为游戏的存档功能）`
@@ -142,7 +146,7 @@ export const commandList: Array<Command> = [
             }
             const title = conversationList[index - 1].title;
             await user.deleteConversation(index - 1);
-            return `存档${title}已删除`;
+            return `存档"${title}"已删除`;
         },
         argNums: new Set([1]),
         help: `delete [序号]: 删除序号对应的已存档的对话，例如: ${CONSTANT.COMMAND_PREFIX}delete 1`
@@ -154,16 +158,16 @@ export const commandList: Array<Command> = [
             const user = await preparedUser(userId);
             const conversation = user.getConversation();
             const info = user.getInfo();
-            let res = `用户信息\n对话模式: ${info.mode}\n对话人设: ${info.prefix}\n对话昵称: You:${info.names[0]}, AI:${info.names[1]}\ntemperature: ${info.temperature}\ntop_p: ${info.top_p}\nfrequency_penalty: ${info.frequency_penalty}\npresence_penalty: ${info.presence_penalty}\n\n当前对话\n`;
+            let res = `用户信息\n对话模式: ${info.mode}\n对话人设: ${info.prefix}\ntemperature: ${info.temperature}\ntop_p: ${info.top_p}\nfrequency_penalty: ${info.frequency_penalty}\npresence_penalty: ${info.presence_penalty}\n\n当前对话\n`;
             if (conversation) {
-                res += `对话人设: ${conversation.prefix}\n对话昵称: You:${conversation.stop[0].replace(':','')}, AI:${conversation.stop[1].replace(':','')}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}`;
+                res += `对话人设: ${conversation.prefix}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}`;
             } else {
                 res += '无';
             }
             return res;
         },
         argNums: new Set([0]),
-        help: `显示当前用户和对话信息，其中temperature、top_p、frequency_penalty、presence_penalty分别对应GPT-3的四个参数，具体含义请参考OpenAI官网的文档，对话模式的含义请使用命令${CONSTANT.COMMAND_PREFIX}help mode查看`
+        help: `显示当前用户和对话信息，其中temperature、top_p、frequency_penalty、presence_penalty分别对应GPT的四个参数，具体含义请参考OpenAI官网的文档，对话模式的含义请使用命令${CONSTANT.COMMAND_PREFIX}help mode查看`
     },
     {
         name: 'retry',
@@ -192,7 +196,7 @@ export const commandList: Array<Command> = [
             const conversation = user.getConversation();
             const [question, answer] = conversation.data.pop();
             user.setConversation(conversation);
-            return `已撤销上一次对话：\n${conversation.stop[0]}${question}\n${conversation.stop[1]}${answer}`;
+            return `已撤销上一次对话：\nuser: ${question}\nassistant: ${answer}`;
         },
         argNums: new Set([0]),
         help: '撤销之前的一次问答记录，被撤销后该问答记录将不会再影响对话的上下文'
@@ -229,18 +233,6 @@ export const commandList: Array<Command> = [
             return `对话人设已设置为：${prefix}`;
         },
         help: `prefix [人设]: 设置对话人设，将在新创建的对话中生效，例如: ${CONSTANT.COMMAND_PREFIX}prefix AI助理乐于助人、富有创意、聪明而且非常友好。\n以下是人类与AI助手的对话。`
-    },
-    {
-        name: 'name',
-        description: '设置对话昵称',
-        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
-            const names = args;
-            const user = await preparedUser(userId);
-            user.setNames([names[0], names[1]]);
-            return `对话昵称已设置为：You:${names[0]}, AI:${names[1]}`;
-        },
-        argNums: new Set([2]),
-        help: `name [用户昵称] [AI昵称]: 设置对话昵称，例如: ${CONSTANT.COMMAND_PREFIX}name 人类 AI助手\n将在新创建的对话中生效`
     },
     {
         name: 'history',
@@ -297,7 +289,7 @@ export const commandList: Array<Command> = [
             shareList.push(JSON.parse(JSON.stringify(conversation)));
             await global.db.set('share', shareList);
             logger('command').info(`[${userId}]分享对话: ${shareList.length}. ${conversation.title}`);
-            return `已分享对话: ${conversation.title}`;
+            return `已分享对话"${conversation.title}"`;
         },
         argNums: new Set([0,1]),
         help: `share [序号(可选)]: 指定序号可以分享已存档的对话，例如: ${CONSTANT.COMMAND_PREFIX}share 1\n如果不指定序号，则显示分享列表`
@@ -320,7 +312,7 @@ export const commandList: Array<Command> = [
             if(!global.chattingUsers.has(userId)) {
                 global.chattingUsers.add(userId);
             }
-            return `已加载分享的存档: ${conversation.title}，对话已开启`;
+            return `已加载分享的存档"${conversation.title}"，对话已开启`;
         }
     }
 ];

@@ -4,7 +4,7 @@ import readline from "readline";
 import { emptyOr, logger } from "./utils/utils.js";
 import { CONSTANT } from "./utils/constant.js";
 
-export class GPT3 {
+export class GPT {
     private openai: OpenAIApi;
     private apiKeys: Array<string> = [];
     private apiKeyIndex: number = 0;
@@ -29,7 +29,7 @@ export class GPT3 {
         });
         await new Promise<void>(resolve => lineReader.on('close', () => resolve()));
         if (this.apiKeys.length === 0) {
-            logger('gpt3').error('没有发现API Key，请在config/api_keys.txt中添加');
+            logger('gpt').error('没有发现API Key，请在config/api_keys.txt中添加');
             return false;
         }
         logger('usage').info(`当前使用的API Key为${this.apiKeys[this.apiKeyIndex]}`);
@@ -53,29 +53,31 @@ export class GPT3 {
         return this.apiKeys;
     }
 
-    async textCompletion(params: Object) {
+    async textCompletion(params) {
         while (this.apiKeyIndex < this.apiKeys.length) {
             try {
-                const { data } = await this.openai.createCompletion({
-                    model: 'text-davinci-003',
+                const { data } = await this.openai.createChatCompletion({
+                    model: "gpt-3.5-turbo",
                     max_tokens: this.maxTokens,
                     ...params,
                 });
                 return ({
-                    text: data.choices[0].text.trim(),
+                    text: data.choices[0].message.content.trim(),
                     usage: data.usage
                 });
             } catch (e) {
-                logger('gpt3').error(`apiKey(${this.apiKeys[this.apiKeyIndex]})请求失败，错误信息：${e.message}`);
+                logger('gpt').error(`apiKey(${this.apiKeys[this.apiKeyIndex]})请求失败，错误信息：${e.message}`);
                 this.apiKeyIndex++;
-                logger('usage').info(`切换API Key为${this.apiKeys[this.apiKeyIndex]}`);
+                if (this.apiKeyIndex < this.apiKeys.length) {
+                    logger('usage').info(`切换API Key为${this.apiKeys[this.apiKeyIndex]}`);
+                }
                 this.openai = new OpenAIApi(new Configuration({
                     apiKey: this.apiKeys[this.apiKeyIndex]
                 }));
             }
         }
         this.apiKeyIndex = 0;
-        logger('gpt3').error(`所有apiKey均请求失败`);
+        logger('gpt').error(`所有apiKey均请求失败`);
         return null;
     }
 }

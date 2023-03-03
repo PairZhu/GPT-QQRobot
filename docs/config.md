@@ -37,9 +37,6 @@ __带"*"加粗的参数为必须配置的参数__
 - 默认人格（一段字符串文本）:
     - 配置文件(`db.json`): `defaultPrefix`
     - 源码修改: `DEFAULT_PREFIX`
-- 默认对话昵称（有两个元素的字符串数组，分别为"用户昵称"和"AI昵称"）:
-    - 配置文件(`db.json`): `defaultNames`
-    - 源码修改: `DEFAULT_NAMES`
 - 
 - 默认对话参数（OpenAI API的四个参数）:
     - 配置文件(`db.json`): `defaultTemperature`、`defaultTop_p`、`defaultFrequency_penalty`、`defaultPresence_penalty`

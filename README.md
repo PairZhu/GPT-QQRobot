@@ -5,12 +5,13 @@
 
 <div align="center">
 
-# GPT3-QQRobot 
-_✨ 基于openai GPT3官方API和go-cqhttp的聊天机器人✨_
+# GPT-QQRobot 
+_✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 </div>
 
 ## 💥功能  
 - [x] docker一键部署
+- [x] 使用ChatGPT(GPT-3.5)模型接口
 - [x] 连续对话（三种对话模式）
 - [x] 人格设置
 - [x] 对话参数配置
@@ -32,7 +33,7 @@ _✨ 基于openai GPT3官方API和go-cqhttp的聊天机器人✨_
 #### 2.1. 部署go-cqhttp
 详细安装方法请参考 [go-cqhttp文档](https://docs.go-cqhttp.org/)  
 其中，go-cqhttp的配置文件config.yml的server部分需要配置http和ws（正向ws）两个通讯方式，可以查看 [参考配置](./docs/go-http.md)
-#### 2.2. 部署GPT3-QQRobot
+#### 2.2. 部署GPT-QQRobot
 有如下两种部署方式：
 - [docker部署](./docs/docker.md)（推荐）✨
 - [源码部署](./docs/source.md)

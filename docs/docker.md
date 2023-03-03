@@ -4,13 +4,13 @@
 - 已经部署好go-cqhttp，并且配置了http和ws（正向ws）两个通讯方式
 ## 1. 拉取镜像
 ```bash
-docker pull pairzhu/gpt3cqrobot
+docker pull pairzhu/gptrobot
 ```
 ## 2. 创建文件夹和必备文件
 ```bash
 cd ~
-mkdir GPT3Robot
-cd GPT3Robot
+mkdir GPTRobot
+cd GPTRobot
 mkdir config
 vim config/api_keys.txt
 ```
@@ -23,16 +23,16 @@ vim docker-compose.yml
 ```yaml
 version: '2'
 services:
-    gpt3robot:
+    gptrobot:
         volumes:
-            - './config:/root/GPT3/config'
-            - './logs:/root/GPT3/logs'
+            - './config:/GPT/config'
+            - './logs:/GPT/logs'
         environment:
             - WS_URL=ws://<改成你配置的URL>
             - HTTP_URL=http://<改成你配置的URL>
-        container_name: gpt3robot
+        container_name: gptrobot
         restart: always
-        image: 'pairzhu/gpt3cqrobot'
+        image: 'pairzhu/gptrobot'
 ```
 其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。
 ## 3. 启动

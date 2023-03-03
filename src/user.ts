@@ -1,12 +1,11 @@
 import { DB } from './utils/db.js';
 import { emptyOr, logger } from './utils/utils.js';
 import { CONSTANT } from "./utils/constant.js";
-import { GPT3 } from './gpt3.js';
+import { GPT } from './gpt.js';
 import fs from 'fs';
 
 export interface Conversation {
     prefix: string;
-    stop: Array<string>;
     temperature: number;
     top_p: number;
     frequency_penalty: number;
@@ -21,14 +20,9 @@ export enum Mode {
     not_save = '之后的对话不保存对话的上下文',
 };
 
-export const conversation2String = (conversation: Conversation) => (
-    conversation.prefix + conversation.data.map((cur) => (`${conversation.stop[0]}${cur[0]}\n${conversation.stop[1]}${cur[1]}`)).join('\n')
-);
-
 export class User {
     private id: string;
     private prefix: string;
-    private names: Array<string>;
     private db: DB;
     private conversations: Array<Conversation>;
     private currentConversation: Conversation;
@@ -36,15 +30,15 @@ export class User {
     private top_p: number;
     private frequency_penalty: number;
     private presence_penalty: number;
-    private gpt3: GPT3;
+    private gpt: GPT;
     private mode: Mode;
     public busy: boolean = false;
 
     private maxPrompts = emptyOr(global.db.get('maxPrompts'), parseInt(process.env.DEFAULT_MAX_PROMPTS), CONSTANT.DEFAULT_MAX_PROMPTS);
 
-    constructor(id: string, gpt3: GPT3) {
+    constructor(id: string, gpt: GPT) {
         this.id = id;
-        this.gpt3 = gpt3;
+        this.gpt = gpt;
         this.db = new DB(`user/${this.id}`);
     }
 
@@ -57,11 +51,6 @@ export class User {
             this.db.get('prefix'),
             global.db.get('defaultPrefix'),
             CONSTANT.DEFAULT_PREFIX
-        );
-        this.names = emptyOr(
-            this.db.get('names'),
-            global.db.get('defaultNames'),
-            CONSTANT.DEFAULT_NAMES
         );
         this.temperature = emptyOr(
             this.db.get('temperature'),
@@ -95,7 +84,6 @@ export class User {
     getInfo() {
         return ({
             prefix: this.prefix,
-            names: this.names,
             temperature: this.temperature,
             top_p: this.top_p,
             frequency_penalty: this.frequency_penalty,
@@ -111,11 +99,6 @@ export class User {
     async setPrefix(prefix: string) {
         this.prefix = prefix;
         await this.db.set('prefix', prefix);
-    }
-
-    async setNames(names: [string, string]) {
-        this.names = names;
-        await this.db.set('names', names);
     }
 
     async setConversation(conversation: Conversation) {
@@ -179,7 +162,6 @@ export class User {
     async beginConversation() {
         this.currentConversation = {
             prefix: this.prefix,
-            stop: [this.names[0] + ':', this.names[1] + ':'],
             temperature: this.temperature,
             top_p: this.top_p,
             frequency_penalty: this.frequency_penalty,
@@ -197,11 +179,14 @@ export class User {
         logger('user').debug(`正在回答[${this.id}]的问题:\n${question}`)
         this.busy = true;
         const conversation = this.currentConversation;
-        const prompt = conversation2String(conversation)
-            + `\n${conversation.stop[0]}${question}\n${conversation.stop[1]}`;
-        const res = await this.gpt3.textCompletion({
-            prompt: prompt,
-            stop: conversation.stop,
+        const messages = [{'role':'system','content':conversation.prefix}];
+        conversation.data.forEach(([q, a]) => {
+            messages.push({'role':'user','content':q});
+            messages.push({'role':'assistant','content':a});
+        })
+        messages.push({'role':'user','content':question});
+        const res = await this.gpt.textCompletion({
+            messages,
             temperature: conversation.temperature,
             top_p: conversation.top_p,
             frequency_penalty: conversation.frequency_penalty,

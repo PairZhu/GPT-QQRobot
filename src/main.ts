@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { Robot } from './robot.js';
-import { GPT3 } from './gpt3.js';
+import { GPT } from './gpt.js';
 import { User } from './user.js';
 import { CONSTANT } from './utils/constant.js';
 import { dealCommand } from './command.js';
@@ -17,8 +17,8 @@ await global.db.init();
 global.robot = new Robot(process.env.WS_URL, process.env.HTTP_URL);
 await global.robot.init();
 
-global.gpt3 = new GPT3();
-await global.gpt3.init();
+global.gpt = new GPT();
+await global.gpt.init();
 
 global.userCache = new LURCache<string, User>({ max: emptyOr(parseInt(process.env.MAX_USER_CACHE), CONSTANT.DEFAULT_MAX_USER_CACHE) });
 global.chattingUsers = new Set<string>();
@@ -57,7 +57,7 @@ fs.readdirSync('config/user').forEach(async file => {
         return;
     }
     const userId = file.slice(0, -5);
-    const user = new User(userId, global.gpt3);
+    const user = new User(userId, global.gpt);
     await user.init();
     if (user.getConversation()) {
         global.chattingUsers.add(userId);
@@ -79,7 +79,7 @@ global.robot.on('private_message', async (data) => {
     }
     let user = global.userCache.get(userId);
     if (!user) {
-        user = new User(userId, global.gpt3);
+        user = new User(userId, global.gpt);
         await user.init();
         global.userCache.set(userId, user);
     }
@@ -115,7 +115,7 @@ if (groupMode !== GroupMode.disable) {
         }
         let user = global.userCache.get(userId);
         if (!user) {
-            user = new User(userId, global.gpt3);
+            user = new User(userId, global.gpt);
             await user.init();
             global.userCache.set(userId, user);
         }

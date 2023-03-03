@@ -1,12 +1,12 @@
 version: '2'
 services:
-    gpt3robot:
+    gptrobot:
         volumes:
-            - './config:/root/GPT3/config'
-            - './logs:/root/GPT3/logs'
+            - './config:/GPT/config'
+            - './logs:/GPT/logs'
         environment:
             - WS_URL=ws://<改成你配置的URL>
             - HTTP_URL=http://<改成你配置的URL>
-        container_name: gpt3robot
+        container_name: gptrobot
         restart: always
-        image: 'pairzhu/gpt3cqrobot'
+        image: 'pairzhu/gptrobot'

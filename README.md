@@ -1,6 +1,6 @@
 <div align="center">
 
-![ico](https://user-images.githubusercontent.com/25968335/120111974-8abef880-c139-11eb-99cd-fa928348b198.png)
+![ico](./docs/images/logo.png)
 </div>
 
 <div align="center">
@@ -47,7 +47,10 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 默认群聊模式为派对模式，同一群聊内的所有人共享一个对话状态  
 默认配置下群聊需要@机器人才能触发对话（每次对话都需要），但是命令不需要@（加上也不影响）
 ## ✨实际效果
-### 群聊
-![群聊](./docs/images/group.png)
-### 私聊
+### 私聊+存档
 ![私聊](./docs/images/private.png)
+
+### 分享存档
+![分享](./docs/images/share.png)
+### 群聊+导入分享
+![群聊](./docs/images/group.png)

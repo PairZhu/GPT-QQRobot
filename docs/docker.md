@@ -36,10 +36,12 @@ services:
 #            - DEFAULT_MAX_PROMPTS=整数（默认为600）
 #            - DEFAULT_MAX_TOKENS=整数（默认为400）
         container_name: gptrobot
+        network_mode: "host"
         restart: always
         image: 'pairzhu/gptrobot'
 ```
-其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。
+其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。  
+如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080`，`HTTP_URL=http://127.0.0.1:5700`
 ## 3. 启动
 ```bash
 docker-compose up -d

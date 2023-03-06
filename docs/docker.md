@@ -28,8 +28,13 @@ services:
             - './config:/GPT/config'
             - './logs:/GPT/logs'
         environment:
-            - WS_URL=ws://<改成你配置的URL>
-            - HTTP_URL=http://<改成你配置的URL>
+            - WS_URL=ws://改成你配置的URL
+            - HTTP_URL=http://改成你配置的URL
+# 如果你在国内，并且不方便使用代理，可以取消下一行的注释
+#            - API_BASE_PATH=https://chat-gpt.aurorax.cloud/v1
+# （以下为可选配置，配置上下文长度限制和回答消耗token数限制）
+#            - DEFAULT_MAX_PROMPTS=整数（默认为600）
+#            - DEFAULT_MAX_TOKENS=整数（默认为400）
         container_name: gptrobot
         restart: always
         image: 'pairzhu/gptrobot'

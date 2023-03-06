@@ -26,6 +26,10 @@ __带"*"加粗的参数为必须配置的参数__
     - 环境变量: `HTTP_URL`
 - __* OpenAI API Key__:
     - 配置文件(`api_keys.txt`): 一行一个API Key 
+- openai api基地址:
+    > 如果服务器在国内且不方便使用代理，请配置此项  
+    > 推荐值为：https://chat-gpt.aurorax.cloud/v1
+    - 环境变量: `API_BASE_PATH`
 - 最大上下文消耗Token数:
     - 环境变量: `DEFAULT_MAX_PROMPTS`
     - 配置文件(`db.json`): `defaultMaxPrompts`

@@ -11,6 +11,11 @@ npm install
 ```.env
 WS_URL=ws://改成你配置的URL
 HTTP_URL=http://改成你配置的URL
+# 如果你在国内，并且不方便使用代理，可以取消下一行的注释
+#API_BASE_PATH=https://chat-gpt.aurorax.cloud/v1
+# 配置上下文长度限制和回答消耗token数限制，如果需要请取消注释
+#DEFAULT_MAX_PROMPTS=整数（默认为600）
+#DEFAULT_MAX_TOKENS=整数（默认为400）
 ```
 其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。  
 在项目根目录下创建`config/api_keys.txt`文件，输入你的OpenAI API Key，一行一个（支持多个API Key，失败了会自动切换为下一个）。

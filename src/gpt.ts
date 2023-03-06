@@ -9,7 +9,7 @@ export class GPT {
     private apiKeys: Array<string> = [];
     private apiKeyIndex: number = 0;
     private maxTokens = emptyOr(global.db.get('maxTokens'), parseInt(process.env.DEFAULT_MAX_TOKENS), CONSTANT.DEFAULT_MAX_TOKENS);
-
+    private apiBase = process.env.API_BASE_PATH;
 
     async init(): Promise<boolean> {
         if (!fs.existsSync('config')) {
@@ -34,7 +34,8 @@ export class GPT {
         }
         logger('usage').info(`当前使用的API Key为${this.apiKeys[this.apiKeyIndex]}`);
         this.openai = new OpenAIApi(new Configuration({
-            apiKey: this.apiKeys[this.apiKeyIndex]
+            apiKey: this.apiKeys[this.apiKeyIndex],
+            basePath: this.apiBase,
         }));
         return true;
     }
@@ -72,7 +73,8 @@ export class GPT {
                     logger('usage').info(`切换API Key为${this.apiKeys[this.apiKeyIndex]}`);
                 }
                 this.openai = new OpenAIApi(new Configuration({
-                    apiKey: this.apiKeys[this.apiKeyIndex]
+                    apiKey: this.apiKeys[this.apiKeyIndex],
+                    basePath: this.apiBase,
                 }));
             }
         }

@@ -33,6 +33,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 #### 2.1. 部署go-cqhttp
 详细安装方法请参考 [go-cqhttp文档](https://docs.go-cqhttp.org/)  
 其中，go-cqhttp的配置文件config.yml的server部分需要配置http和ws（正向ws）两个通讯方式，可以查看 [参考配置](./docs/go-http.md)
+__不会配置的请使用参考配置！！！__
 #### 2.2. 部署GPT-QQRobot
 有如下两种部署方式：
 - [docker部署](./docs/docker.md)（推荐）✨

@@ -197,6 +197,10 @@ export class User {
             return '出错了，请稍后再试，或联系管理员';
         }
         logger('user').debug(`[${this.id}]的回答结果:\n${res.text}`)
+        // 如果conversation已经被切换，说明用户已经开始了新的对话，那么就不保存这次的对话
+        if (conversation !== this.currentConversation) {
+            return res.text;
+        }
         conversation.data.push([question, res.text]);
         let tip = '';
         switch (this.mode) {

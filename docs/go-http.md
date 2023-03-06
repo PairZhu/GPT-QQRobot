@@ -8,7 +8,7 @@ servers:
   #- pprof: #性能分析服务器
   # HTTP 通信设置
   - http:
-      # 服务端监听地址
+      # 服务端监听地址（不懂就不要改地址）
       host: 0.0.0.0
       # 服务端监听端口
       port: 5700
@@ -17,7 +17,7 @@ servers:
       timeout: 5
       middlewares:
         <<: *default # 引用默认中间件
-      # 反向HTTP POST地址列表
+      # 反向HTTP POST地址列表（不需要使用，所以不用填）
       post:
       #- url: '' # 地址
       #  secret: ''           # 密钥
@@ -25,7 +25,7 @@ servers:
       #  secret: ''          # 密钥
   # 正向WS设置
   - ws:
-      # 正向WS服务器监听地址
+      # 正向WS服务器监听地址（不懂就不要改地址）
       host: 0.0.0.0
       # 正向WS服务器监听端口
       port: 8080
@@ -33,3 +33,4 @@ servers:
         <<: *default # 引用默认中间件
 ```
 其中两个port可以根据需要修改，但是需要保证go-cqhttp的http和ws的端口和配置文件中的端口一致。
+如果用了推荐配置，那么ws和http的端口就是8080和5700

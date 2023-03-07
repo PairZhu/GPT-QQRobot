@@ -48,6 +48,10 @@ __不会配置的请使用参考配置！！！__
 默认群聊模式为派对模式，同一群聊内的所有人共享一个对话状态  
 默认配置下群聊需要@机器人才能触发对话（每次对话都需要），但是命令不需要@（加上也不影响）
 ## ✨实际效果
+### 视频演示
+
+[![B站演示视频](https://i0.hdslb.com/bfs/archive/4e5a82609ec92ef92812cce93be221efe556ea69.png@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1io4y1z7GG)
+
 ### 私聊+存档
 ![私聊](./docs/images/private.png)
 

@@ -32,11 +32,11 @@ __带"*"加粗的参数为必须配置的参数__
     - 环境变量: `API_BASE_PATH`
 - 最大上下文消耗Token数:
     - 环境变量: `DEFAULT_MAX_PROMPTS`
-    - 配置文件(`db.json`): `defaultMaxPrompts`
+    - 配置文件(`db.json`): `maxPrompts`
     - 源码修改: `DEFAULT_MAX_PROMPTS`
 - 最大对话消耗Token数:
     - 环境变量: `DEFAULT_MAX_TOKENS`
-    - 配置文件(`db.json`): `defaultMaxTokens`
+    - 配置文件(`db.json`): `maxTokens`
     - 源码修改: `DEFAULT_MAX_TOKENS`
 - 默认人格（一段字符串文本）:
     - 配置文件(`db.json`): `defaultPrefix`

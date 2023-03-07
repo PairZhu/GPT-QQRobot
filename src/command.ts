@@ -21,7 +21,7 @@ async function preparedUser(userId: string): Promise<User> {
 }
 
 const conversation2String = (conversation: Conversation) => (
-    conversation.prefix+ '\n' + conversation.data.map((cur) => (`user: ${cur[0]}\nassistant: ${cur[1]}`)).join('\n')
+    '人设: ' + conversation.prefix+ '\n' + conversation.data.map((cur) => (`user: ${cur[0]}\nassistant: ${cur[1]}`)).join('\n')
 );
 
 export const commandList: Array<Command> = [
@@ -224,13 +224,9 @@ export const commandList: Array<Command> = [
             if (!prefix) {
                 return `缺少人设内容，请输入${CONSTANT.COMMAND_PREFIX}help char查看帮助信息`;
             }
-            // 如果不以换行结尾，就加上换行
-            if (!prefix.endsWith('\n')) {
-                prefix += '\n';
-            }
             const user = await preparedUser(userId);
             user.setPrefix(prefix);
-            return `对话人设已设置为：${prefix}`;
+            return `对话人设已设置为：${prefix}\n\n将在新创建的对话中生效`;
         },
         help: `char [人设]: 设置对话人设，将在新创建的对话中生效，例如: ${CONSTANT.COMMAND_PREFIX}char ${CONSTANT.DEFAULT_PREFIX}`
     },

@@ -11,4 +11,6 @@ export const CONSTANT = {
     COMMAND_PREFIX: '#gpt ',
     GROUP_MODE: 'party',
     AT_MODE: 'message',
+    AUTO_PRIVATE: false,
+    AUTO_GROUP: false,
 }

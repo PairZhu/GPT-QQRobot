@@ -36,8 +36,11 @@ enum AtMode {
     command = 'command', // 命令需要@机器人，聊天不需要
 }
 
-const groupMode = GroupMode[emptyOr(process.env.GROUP_MODE, global.db.get('groupMode'), CONSTANT.GROUP_MODE)];
-const atMode = AtMode[emptyOr(process.env.AT_MODE, global.db.get('atMode'), CONSTANT.AT_MODE)];
+const groupMode = GroupMode[emptyOr(global.db.get('groupMode'), process.env.GROUP_MODE, CONSTANT.GROUP_MODE)];
+const atMode = AtMode[emptyOr(global.db.get('atMode'), process.env.AT_MODE, CONSTANT.AT_MODE)];
+const autoPrivate = Boolean(emptyOr(global.db.get('autoPrivate'), process.env.AUTO_PRIVATE, CONSTANT.AUTO_PRIVATE));
+const autoGroup = Boolean(emptyOr(global.db.get('autoGroup'), process.env.AUTO_GROUP, CONSTANT.AUTO_GROUP));
+
 if (!groupMode) {
     logger('master').error(`群聊模式错误，应为${Object.keys(GroupMode).join('、')}其中之一，程序已退出`)
     process.exit(1);
@@ -64,27 +67,43 @@ fs.readdirSync('config/user').forEach(async file => {
     }
 });
 
+const dealMessage = async (
+    message: string,
+    userId: string,
+    allowCommand: boolean = true,
+    allowChat: boolean = true,
+) => {
+    if (message.startsWith(CONSTANT.COMMAND_PREFIX) && allowCommand) {
+        const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
+        const res = await dealCommand(userId, commandStr);
+        return res;
+    }
+    if (allowChat) {
+        let user = global.userCache.get(userId);
+        if (!user) {
+            user = new User(userId, global.gpt);
+            await user.init();
+            global.userCache.set(userId, user);
+        }
+        if (!global.chattingUsers.has(userId)) {
+            global.chattingUsers.add(userId);
+            await user.beginConversation();
+        }
+        const res = await user.getAnswer(message);
+        return res;
+    }
+    return null;
+
+}
+
 global.robot.on('private_message', async (data) => {
     const userId = data.user_id.toString();
     const replyCode = `[CQ:reply,id=${data.message_id}]`
-    const message = data.message;
-    if (message.startsWith(CONSTANT.COMMAND_PREFIX)) {
-        const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
-        const res = await dealCommand(userId, commandStr);
-        global.robot.sendPrivate(replyCode + res, userId);
-        return;
+    const allowChat = autoPrivate || global.chattingUsers.has(userId);
+    const res = await dealMessage(data.message, userId, true, allowChat);
+    if (res !== null) {
+        global.robot.sendPrivate(replyCode + res, data.user_id);
     }
-    if (!global.chattingUsers.has(userId)) {
-        return;
-    }
-    let user = global.userCache.get(userId);
-    if (!user) {
-        user = new User(userId, global.gpt);
-        await user.init();
-        global.userCache.set(userId, user);
-    }
-    const res = await user.getAnswer(message);
-    global.robot.sendPrivate(replyCode + res, userId);
 });
 
 if (groupMode !== GroupMode.disable) {
@@ -96,31 +115,14 @@ if (groupMode !== GroupMode.disable) {
         if (atMode === AtMode.always && !withAtCode) {
             return;
         }
+        const allowCommand = atMode !== AtMode.command || withAtCode;
+        const allowChat = (atMode !== AtMode.message || withAtCode) && (autoGroup || global.chattingUsers.has(userId));
         // 删除所有atCode
         const message = data.message.replaceAll(atCode+' ', '').replaceAll(atCode, '');
-        if (message.startsWith(CONSTANT.COMMAND_PREFIX)) {
-            if (atMode === AtMode.command && !withAtCode) {
-                return;
-            }
-            const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
-            const res = await dealCommand(userId, commandStr);
+        const res = await dealMessage(message, userId, allowCommand, allowChat);
+        if(res!==null) {
             global.robot.sendGroup(replyCode + res, data.group_id);
-            return;
         }
-        if (atMode === AtMode.message && !withAtCode) {
-            return;
-        }
-        if (!global.chattingUsers.has(userId)) {
-            return;
-        }
-        let user = global.userCache.get(userId);
-        if (!user) {
-            user = new User(userId, global.gpt);
-            await user.init();
-            global.userCache.set(userId, user);
-        }
-        const res = await user.getAnswer(message);
-        global.robot.sendGroup(replyCode + res, data.group_id);
     })
 }
 

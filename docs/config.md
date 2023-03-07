@@ -38,10 +38,15 @@ __带"*"加粗的参数为必须配置的参数__
     - 环境变量: `DEFAULT_MAX_TOKENS`
     - 配置文件(`db.json`): `maxTokens`
     - 源码修改: `DEFAULT_MAX_TOKENS`
+- 私聊、群聊自动开始对话（布尔值）
+    > 私聊时，无须输入命令自动开始对话
+    > 如果不需要，请勿配置此项，如果此项环境变量中设置值任意值都会被视为true，包括false、0、""等
+    - 环境变量（不需要请勿设置）: `AUTO_PRIVATE`、`AUTO_GROUP`
+    - 配置文件(`db.json`): `autoPrivate`、`autoGroup`
+    - 源码修改: `AUTO_PRIVATE`、`AUTO_GROUP`
 - 默认人格（一段字符串文本）:
     - 配置文件(`db.json`): `defaultPrefix`
     - 源码修改: `DEFAULT_PREFIX`
-- 
 - 默认对话参数（OpenAI API的四个参数）:
     - 配置文件(`db.json`): `defaultTemperature`、`defaultTop_p`、`defaultFrequency_penalty`、`defaultPresence_penalty`
     - 源码修改: `DEFAULT_TEMPERATURE`、`DEFAULT_TOP_P`、`DEFAULT_FREQUENCY_PENALTY`、`DEFAULT_PRESENCE_PENALTY`
@@ -58,6 +63,7 @@ __带"*"加粗的参数为必须配置的参数__
     >party: 派对模式，所有用户共享一个对话  
     >disable: 禁止模式，不响应群聊消息
     - 环境变量: `GROUP_MODE`
+    - 配置文件(`db.json`): `groupMode`
     - 源码修改: `GROUP_MODE`
 - 群聊响应方式（"always"、"never"、"message"、"command"三选一）:
     >always: 命令和聊天都需要@机器人
@@ -65,6 +71,7 @@ __带"*"加粗的参数为必须配置的参数__
     >message: 聊天需要@机器人，命令不需要
     >command: 命令需要@机器人，聊天不需要
     - 环境变量: `AT_MODE`
+    - 配置文件(`db.json`): `atMode`
     - 源码修改: `AT_MODE`
 
 - LUR缓存大小（如果主机内存小可以适当调小，如果主机内存大且用户量大可以适当调高）:

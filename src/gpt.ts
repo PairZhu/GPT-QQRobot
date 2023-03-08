@@ -1,16 +1,14 @@
 import { Configuration, OpenAIApi } from "openai";
 import fs from "fs";
 import readline from "readline";
-import { emptyOr, logger } from "./utils/utils.js";
-import { CONSTANT } from "./utils/constant.js";
-import HttpsProxyAgent from "https-proxy-agent";
+import { logger } from "./utils/utils.js";
+import { setting } from "./setting.js";
+import HttpsProxyAgent from 'https-proxy-agent';
 
 export class GPT {
     private openai: OpenAIApi;
     private apiKeys: Array<string> = [];
     private apiKeyIndex: number = 0;
-    private maxTokens = emptyOr(global.db.get('maxTokens'), parseInt(process.env.DEFAULT_MAX_TOKENS), CONSTANT.DEFAULT_MAX_TOKENS);
-    private apiBase = process.env.API_BASE_PATH;
 
     async init(): Promise<boolean> {
         if (!fs.existsSync('config')) {
@@ -36,7 +34,7 @@ export class GPT {
         logger('usage').info(`当前使用的API Key为${this.apiKeys[this.apiKeyIndex]}`);
         this.openai = new OpenAIApi(new Configuration({
             apiKey: this.apiKeys[this.apiKeyIndex],
-            basePath: this.apiBase,
+            basePath: process.env.API_BASE_PATH,
         }));
         return true;
     }
@@ -55,14 +53,20 @@ export class GPT {
         return this.apiKeys;
     }
 
-    async textCompletion(params) {
+    async chatCompletion(params) {
         while (this.apiKeyIndex < this.apiKeys.length) {
             try {
-                const { data } = await this.openai.createChatCompletion({
-                    model: "gpt-3.5-turbo",
-                    max_tokens: this.maxTokens,
-                    ...params,
-                    },);
+                const { data } = await this.openai.createChatCompletion(
+                    {
+                        model: "gpt-3.5-turbo",
+                        max_tokens: setting.maxTokens,
+                        ...params,
+                    }, process.env.PROXY ? {
+                        proxy: false,
+                        httpAgent: HttpsProxyAgent(process.env.PROXY),
+                        httpsAgent: HttpsProxyAgent(process.env.PROXY)
+                    } : undefined
+                );
                 return ({
                     text: data.choices[0].message.content.trim(),
                     usage: data.usage
@@ -75,7 +79,7 @@ export class GPT {
                 }
                 this.openai = new OpenAIApi(new Configuration({
                     apiKey: this.apiKeys[this.apiKeyIndex],
-                    basePath: this.apiBase,
+                    basePath: process.env.API_BASE_PATH,
                 }));
             }
         }

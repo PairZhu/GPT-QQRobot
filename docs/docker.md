@@ -30,6 +30,8 @@ services:
         environment:
             - WS_URL=ws://改成你配置的URL
             - HTTP_URL=http://改成你配置的URL
+# 如果你在国内需要用代理，请取消下面一行的注释并修改为你的代理地址
+#            - PROXY=http://代理地址:端口
 # 如果你在国内，并且不方便使用代理，可以使用第三方的接口（本人不对第三方API的安全性负责）
 #            - API_BASE_PATH=第三方api地址
 # （以下为可选配置，配置上下文长度限制和回答消耗token数限制）

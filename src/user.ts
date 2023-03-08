@@ -2,6 +2,7 @@ import { DB } from './utils/db.js';
 import { emptyOr, logger } from './utils/utils.js';
 import { CONSTANT } from "./utils/constant.js";
 import { GPT } from './gpt.js';
+import { setting, ChatMode } from './setting.js';
 import fs from 'fs';
 
 export interface Conversation {
@@ -14,12 +15,6 @@ export interface Conversation {
     title: string;
 }
 
-export enum Mode {
-    pop_back = '如果对话达到最大长度，将自动删除最新的一条对话记录',
-    pop_front = '如果对话达到最大长度，将自动删除最早的一条对话记录',
-    not_save = '之后的对话不保存对话的上下文',
-};
-
 export class User {
     private id: string;
     private prefix: string;
@@ -31,10 +26,9 @@ export class User {
     private frequency_penalty: number;
     private presence_penalty: number;
     private gpt: GPT;
-    private mode: Mode;
+    private mode: ChatMode;
     public busy: boolean = false;
 
-    private maxPrompts = emptyOr(global.db.get('maxPrompts'), parseInt(process.env.DEFAULT_MAX_PROMPTS), CONSTANT.DEFAULT_MAX_PROMPTS);
 
     constructor(id: string, gpt: GPT) {
         this.id = id;
@@ -47,48 +41,24 @@ export class User {
             fs.mkdirSync('config/user');
         }
         await this.db.init();
-        this.prefix = emptyOr(
-            this.db.get('prefix'),
-            global.db.get('defaultPrefix'),
-            CONSTANT.DEFAULT_PREFIX
-        );
-        this.temperature = emptyOr(
-            this.db.get('temperature'),
-            global.db.get('defaultTemperature'),
-            CONSTANT.DEFAULT_TEMPERATURE
-        );
-        this.top_p = emptyOr(
-            this.db.get('top_p'),
-            global.db.get('defaultTop_p'),
-            CONSTANT.DEFAULT_TOP_P
-        );
-        this.frequency_penalty = emptyOr(
-            this.db.get('frequency_penalty'),
-            global.db.get('defaultFrequency_penalty'),
-            CONSTANT.DEFAULT_FREQUENCY_PENALTY
-        );
-        this.presence_penalty = emptyOr(
-            this.db.get('presence_penalty'),
-            global.db.get('defaultPresence_penalty'),
-            CONSTANT.DEFAULT_PRESENCE_PENALTY
-        );
-        this.mode = Mode[emptyOr(
-            this.db.get('mode'),
-            global.db.get('defaultMode'),
-            CONSTANT.DEFAULT_MODE
-        )];
+        this.prefix = this.db.get('prefix');
+        this.temperature = this.db.get('temperature');
+        this.top_p = this.db.get('top_p');
+        this.frequency_penalty = this.db.get('frequency_penalty');
+        this.presence_penalty = this.db.get('presence_penalty');
+        this.mode = ChatMode[this.db.get('mode')];
         this.conversations = this.db.get('conversations') || [];
         this.currentConversation = this.db.get('currentConversation', undefined);
     }
 
     getInfo() {
         return ({
-            prefix: this.prefix,
-            temperature: this.temperature,
-            top_p: this.top_p,
-            frequency_penalty: this.frequency_penalty,
-            presence_penalty: this.presence_penalty,
-            mode: Object.keys(Mode).find(key => Mode[key] === this.mode),
+            prefix: emptyOr(this.prefix, setting.defaultPrefix),
+            temperature: emptyOr(this.temperature, setting.defaultTemperature),
+            top_p: emptyOr(this.top_p, setting.defaultTop_p),
+            frequency_penalty: emptyOr(this.frequency_penalty, setting.defaultFrequency_penalty),
+            presence_penalty: emptyOr(this.presence_penalty, setting.defaultPresence_penalty),
+            mode: Object.keys(ChatMode).find(key => ChatMode[key] === emptyOr(this.mode, setting.defaultMode)),
         });
     }
 
@@ -120,12 +90,28 @@ export class User {
         await this.db.save();
     }
 
+    async resetParams() {
+        await this.setParams({
+            temperature: undefined,
+            top_p: undefined,
+            frequency_penalty: undefined,
+            presence_penalty: undefined,
+        });
+        await this.setMode(undefined);
+        await this.setPrefix(undefined);
+    }
+
     async setMode(mode: string): Promise<boolean> {
-        if (Mode[mode]) {
-            this.mode = Mode[mode];
+        if (ChatMode[mode]) {
+            this.mode = ChatMode[mode];
+            await this.db.set('mode', mode);
             return true;
         }
-        await this.db.set('mode', mode);
+        if (mode === undefined || mode === null) {
+            this.mode = undefined;
+            await this.db.set('mode', undefined);
+            return true;
+        }
         return false;
     }
 
@@ -161,11 +147,11 @@ export class User {
 
     async beginConversation() {
         this.currentConversation = {
-            prefix: this.prefix,
-            temperature: this.temperature,
-            top_p: this.top_p,
-            frequency_penalty: this.frequency_penalty,
-            presence_penalty: this.presence_penalty,
+            prefix: emptyOr(this.prefix, setting.defaultPrefix),
+            temperature: emptyOr(this.temperature, setting.defaultTemperature),
+            top_p: emptyOr(this.top_p, setting.defaultTop_p),
+            frequency_penalty: emptyOr(this.frequency_penalty, setting.defaultFrequency_penalty),
+            presence_penalty: emptyOr(this.presence_penalty, setting.defaultPresence_penalty),
             data: [],
             title: undefined,
         };
@@ -185,7 +171,7 @@ export class User {
             messages.push({'role':'assistant','content':a});
         })
         messages.push({'role':'user','content':question});
-        const res = await this.gpt.textCompletion({
+        const res = await this.gpt.chatCompletion({
             messages,
             temperature: conversation.temperature,
             top_p: conversation.top_p,
@@ -203,23 +189,23 @@ export class User {
         }
         conversation.data.push([question, res.text]);
         let tip = '';
-        switch (this.mode) {
-            case Mode.pop_front:
-                if (res.usage.prompt_tokens >= this.maxPrompts) {
+        switch (emptyOr(this.mode, setting.defaultMode)) {
+            case ChatMode.pop_front:
+                if (res.usage.prompt_tokens >= setting.maxPrompts) {
                     tip = '(对话已达到最大长度，将删除最早的一条对话)\n';
                     conversation.data.shift();
                 }
                 await this.setConversation(conversation);
                 break;
-            case Mode.pop_back:
-                if (res.usage.prompt_tokens >= this.maxPrompts) {
+            case ChatMode.pop_back:
+                if (res.usage.prompt_tokens >= setting.maxPrompts) {
                     tip = '(对话已达到最大长度，此次问答将不会被记录)\n';
                     conversation.data.pop();
                 } else {
                     await this.setConversation(conversation);
                 }
                 break;
-            case Mode.not_save:
+            case ChatMode.not_save:
                 tip = '(当前模式为不记录模式，此次问答将不会被记录)\n';
                 conversation.data.pop();
                 break;

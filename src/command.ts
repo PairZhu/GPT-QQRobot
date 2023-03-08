@@ -1,7 +1,7 @@
 import { CONSTANT } from "./utils/constant.js";
-import { User, Mode, Conversation } from "./user.js";
+import { User, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
-
+import { ChatMode } from "./setting.js";
 export interface Command {
     name: string;
     description: string;
@@ -213,7 +213,7 @@ export const commandList: Array<Command> = [
             return `未找到该对话模式"${mode}"，输入${CONSTANT.COMMAND_PREFIX}help mode查看帮助`;
         },
         argNums: new Set([1]),
-        help: `mode [模式]: 设置对话模式，例如：${CONSTANT.COMMAND_PREFIX}mode pop_back\n\n目前支持的模式有:\n${Object.keys(Mode).map(key => `${key}: ${Mode[key]}`).join('\n')}\n\n设置的模式对下次问答立即生效`
+        help: `mode [模式]: 设置对话模式，例如：${CONSTANT.COMMAND_PREFIX}mode pop_back\n\n目前支持的模式有:\n${Object.keys(ChatMode).map(key => `${key}: ${ChatMode[key]}`).join('\n')}\n\n设置的模式对下次问答立即生效`
     },
     {
         name: 'char',
@@ -309,7 +309,20 @@ export const commandList: Array<Command> = [
                 global.chattingUsers.add(userId);
             }
             return `已加载分享的存档"${conversation.title}"，对话已开启`;
-        }
+        },
+        argNums: new Set([1]),
+        help: `import [序号]: 导入分享的对话，例如: ${CONSTANT.COMMAND_PREFIX}import 1\n输入${CONSTANT.COMMAND_PREFIX}share查看分享列表`
+    },
+    {
+        name: 'reset',
+        description: '重置用户参数',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const user = await preparedUser(userId);
+            await user.resetParams();
+            return '用户参数已重置，将在新创建的对话中生效';
+        },
+        argNums: new Set([0]),
+        help: `reset: 重置用户参数，将在新创建的对话中生效`
     }
 ];
 

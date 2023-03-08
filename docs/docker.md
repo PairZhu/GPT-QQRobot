@@ -30,8 +30,8 @@ services:
         environment:
             - WS_URL=ws://改成你配置的URL
             - HTTP_URL=http://改成你配置的URL
-# 如果你在国内，并且不方便使用代理，可以取消下一行的注释，使用第三方的接口（本人不对第三方API的安全性负责）
-#            - API_BASE_PATH=https://chat-gpt.aurorax.cloud/v1（已失效）
+# 如果你在国内，并且不方便使用代理，可以使用第三方的接口（本人不对第三方API的安全性负责）
+#            - API_BASE_PATH=第三方api地址
 # （以下为可选配置，配置上下文长度限制和回答消耗token数限制）
 #            - DEFAULT_MAX_PROMPTS=整数（默认为600）
 #            - DEFAULT_MAX_TOKENS=整数（默认为400）
@@ -40,6 +40,7 @@ services:
         restart: always
         image: 'pairzhu/gptrobot'
 ```
+查看目前已收集的第三方api地址 [查看](./api.md)  
 其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。  
 如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080`，`HTTP_URL=http://127.0.0.1:5700`
 ## 3. 启动

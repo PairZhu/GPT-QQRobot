@@ -3,10 +3,19 @@ import fetch from "node-fetch";
 import { sleep, logger } from "./utils/utils.js";
 
 export class Robot {
+    private static splitLength = 1000;
     private ws: ws;
     private httpUrl: string;
     private wsUrl: string;
     public info;
+
+    private static splitString(str: string): string[] {
+        const result = [];
+        for (let i = 0; i < str.length; i += Robot.splitLength) {
+            result.push(str.slice(i, i + Robot.splitLength));
+        }
+        return result;
+    }
 
     private static async connectedClient(url: string): Promise<boolean> {
         const wsResult = client => new Promise((resolve) => {
@@ -108,25 +117,32 @@ export class Robot {
         this.ws.send(JSON.stringify(content));
     }
 
-
-
-    sendPrivate(str: string, QQId) {
-        this.send({
-            action: 'send_private_msg',
-            params: {
-                user_id: QQId,
-                message: str,
-            },
-        });
+    async sendPrivate(str: string, id: string) {
+        // 如果太长，分段发送
+        const splitList = Robot.splitString(str);
+        for (const split of splitList) {
+            this.send({
+                action: 'send_private_msg',
+                params: {
+                    user_id: id,
+                    message: split,
+                },
+            });
+            await sleep(200);
+        }
     }
 
-    sendGroup(str: string, QQId) {
-        this.send({
-            action: 'send_group_msg',
-            params: {
-                group_id: QQId,
-                message: str,
-            },
-        });
+    async sendGroup(str: string, id: string) {
+        const splitList = Robot.splitString(str);
+        for (const split of splitList) {
+            this.send({
+                action: 'send_group_msg',
+                params: {
+                    user_id: id,
+                    message: split,
+                },
+            });
+            await sleep(200);
+        }
     }
 }

@@ -264,7 +264,7 @@ export const commandList: Array<Command> = [
     },
     {
         name: 'share',
-        description: '分享已存档的对话',
+        description: '查看分享的存档',
         deal: async function (userId: string, originStr: string, ...args: Array<string>) {
             const shareList = global.db.get('share',[]);
             if(args.length === 0) {

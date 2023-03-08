@@ -3,6 +3,7 @@ import fs from "fs";
 import readline from "readline";
 import { emptyOr, logger } from "./utils/utils.js";
 import { CONSTANT } from "./utils/constant.js";
+import HttpsProxyAgent from "https-proxy-agent";
 
 export class GPT {
     private openai: OpenAIApi;
@@ -61,7 +62,7 @@ export class GPT {
                     model: "gpt-3.5-turbo",
                     max_tokens: this.maxTokens,
                     ...params,
-                });
+                    },);
                 return ({
                     text: data.choices[0].message.content.trim(),
                     usage: data.usage

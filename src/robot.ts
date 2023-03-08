@@ -138,7 +138,7 @@ export class Robot {
             this.send({
                 action: 'send_group_msg',
                 params: {
-                    user_id: id,
+                    group_id: id,
                     message: split,
                 },
             });

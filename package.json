@@ -12,6 +12,7 @@
   "dependencies": {
     "@nestjs/cli": "^9.2.0",
     "dotenv": "^16.0.3",
+    "https-proxy-agent": "^5.0.1",
     "log4js": "^6.7.1",
     "lowdb": "^4.0.0",
     "lru-cache": "^7.16.0",

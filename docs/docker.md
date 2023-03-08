@@ -28,6 +28,7 @@ services:
             - './config:/GPT/config'
             - './logs:/GPT/logs'
         environment:
+# URL的末尾不要加斜杠
             - WS_URL=ws://改成你配置的URL
             - HTTP_URL=http://改成你配置的URL
 # 如果你在国内需要用代理，请取消下面一行的注释并修改为你的代理地址

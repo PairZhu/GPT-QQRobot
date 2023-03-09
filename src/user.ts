@@ -155,6 +155,7 @@ export class User {
             data: [],
             title: undefined,
         };
+        this.busy = false;
         await this.db.set('currentConversation', this.currentConversation);
     }
 

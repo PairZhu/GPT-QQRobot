@@ -15,7 +15,7 @@ dotenv.config();
 global.db = new DB('db.json');
 await global.db.init();
 
-global.robot = new Robot(process.env.WS_URL, process.env.HTTP_URL);
+global.robot = new Robot(process.env.WS_URL);
 await global.robot.init();
 
 global.gpt = new GPT();
@@ -112,3 +112,4 @@ global.robot.on('group_message', async (data) => {
     }
 });
 
+logger('master').info('GPT-QQRobot启动成功！');

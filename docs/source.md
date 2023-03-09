@@ -10,9 +10,7 @@ npm install
 ### 3.1
 在项目的根目录下创建`.env`文件，内容如下：
 ```.env
-# URL的末尾不要加斜杠
 WS_URL=ws://改成你配置的URL
-HTTP_URL=http://改成你配置的URL
 # 如果你在国内需要用代理，请取消下面一行的注释并修改为你的代理地址
 #PROXY=http://代理地址:端口
 # 如果你在国内，并且不方便使用代理，可以取消下一行的注释，使用第三方的接口（本人不对第三方API的安全性负责）
@@ -22,8 +20,8 @@ HTTP_URL=http://改成你配置的URL
 #DEFAULT_MAX_TOKENS=整数（默认为400）
 ```
 查看目前已收集的第三方api地址 [查看](./api.md)  
-其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。  
-如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080`，`HTTP_URL=http://127.0.0.1:5700`  
+其中，`WS_URL`是你go-cqhttp配置的ws通讯的URL。  
+如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080` 
 ### 3.2
 在项目根目录下创建`config/api_keys.txt`文件，输入你的OpenAI API Key，一行一个（支持多个API Key，失败了会自动切换为下一个）。
 ## 4. 启动

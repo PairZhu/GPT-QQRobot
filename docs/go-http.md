@@ -6,23 +6,6 @@ servers:
   #- ws:   # 正向 Websocket
   #- ws-reverse: # 反向 Websocket
   #- pprof: #性能分析服务器
-  # HTTP 通信设置
-  - http:
-      # 服务端监听地址（不懂就不要改地址）
-      host: 0.0.0.0
-      # 服务端监听端口
-      port: 5700
-      # 反向HTTP超时时间, 单位秒
-      # 最小值为5，小于5将会忽略本项设置
-      timeout: 5
-      middlewares:
-        <<: *default # 引用默认中间件
-      # 反向HTTP POST地址列表（不需要使用，所以不用填）
-      post:
-      #- url: '' # 地址
-      #  secret: ''           # 密钥
-      #- url: 127.0.0.1:5701 # 地址
-      #  secret: ''          # 密钥
   # 正向WS设置
   - ws:
       # 正向WS服务器监听地址（不懂就不要改地址）
@@ -32,5 +15,5 @@ servers:
       middlewares:
         <<: *default # 引用默认中间件
 ```
-其中两个port可以根据需要修改，但是需要保证go-cqhttp的http和ws的端口和配置文件中的端口一致。
-如果用了推荐配置，那么ws和http的端口就是8080和5700
+其中两个port可以根据需要修改，但是需要保证go-cqhttp的ws的端口和配置文件中的端口一致。
+如果用了推荐配置，那么ws的端口就是8080

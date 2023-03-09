@@ -1,20 +1,36 @@
 import ws from "ws";
-import fetch from "node-fetch";
 import { sleep, logger } from "./utils/utils.js";
+import { v4 as uuidv4 } from 'uuid';
 
 export class Robot {
-    private static splitLength = 1000;
+    private static maxSplit = 1000;
+    private static minSplit = 850;
+    // 越靠前的分隔符优先级越高
+    private static splitCharList = ['\n',',','，','.','。','!','！','?','？',' ','\t'];
+    private static webSocketTimeout = 30 * 1000;
     private ws: ws;
-    private httpUrl: string;
     private wsUrl: string;
+    private privateListeners: Map<Function, Function> = new Map();
+    private groupListeners: Map<Function, Function> = new Map();
+    private listeners: Map<Function, Function> = new Map();
     public info;
 
     private static splitString(str: string): string[] {
         const result = [];
-        for (let i = 0; i < str.length; i += Robot.splitLength) {
-            result.push(str.slice(i, i + Robot.splitLength));
+        while (str.length>0) {
+            let index = Robot.maxSplit;
+            // 遍历所有分隔符
+            for (let splitChar of Robot.splitCharList) {
+                const splitIndex = str.lastIndexOf(splitChar, Robot.maxSplit-1)+1;
+                if (splitIndex > Robot.minSplit) {
+                    index = splitIndex;
+                    break;
+                }
+            }
+            result.push(str.slice(0, index));
+            str = str.slice(index);
         }
-        return result;
+        return result
     }
 
     private static async connectedClient(url: string): Promise<boolean> {
@@ -51,39 +67,66 @@ export class Robot {
         return str.replaceAll(reg, (_, val) => String.fromCharCode(val)).replaceAll('&amp;', '&');
     }
 
-    constructor(wsUrl?: string, httpUrl?: string) {
+    constructor(wsUrl?: string) {
         this.wsUrl = wsUrl;
-        this.httpUrl = httpUrl;
     }
 
-    on(event: string, callback) {
+    on(event: string, callback:Function) {
+        let listener:Function;
         switch (event) {
             case 'message':
-                this.ws.on('message', data => {
+                listener = data => {
                     data = JSON.parse(data);
                     callback(data);
-                })
+                }
+                this.ws.on('message', listener);
+                this.listeners.set(callback, listener);
                 break;
             case 'private_message':
-                this.ws.on('message', data => {
+                listener = data => {
                     data = JSON.parse(data);
                     if (!data.message) return;
                     data.message = Robot.decodeMsg(data.message);
                     if (data.message_type !== 'private') return;
                     callback(data);
-                })
+                }
+                this.ws.on('message', listener);
+                this.privateListeners.set(callback, listener);
                 break;
             case 'group_message':
-                this.ws.on('message', data => {
+                listener = data => {
                     data = JSON.parse(data);
                     if (!data.message) return;
                     data.message = Robot.decodeMsg(data.message);
                     if (data.message_type !== 'group') return;
                     callback(data);
-                })
+                }
+                this.ws.on('message', listener);
+                this.groupListeners.set(callback, listener);
                 break;
             default:
                 this.ws.on(event, callback);
+                break;
+        }
+    }
+
+    off(event: string, callback:Function) {
+        switch (event) {
+            case 'message':
+                this.ws.off('message', this.listeners.get(callback));
+                this.listeners.delete(callback);
+                break;
+            case 'private_message':
+                this.ws.off('message', this.privateListeners.get(callback));
+                this.privateListeners.delete(callback);
+                break;
+            case 'group_message':
+                this.ws.off('message', this.groupListeners.get(callback));
+                this.groupListeners.delete(callback);
+                break;
+            default:
+                this.ws.off(event, callback);
+                break;
         }
     }
 
@@ -101,8 +144,8 @@ export class Robot {
         })
         logger('robot').info("开始获取登录信息...");
         try {
-            const res = await fetch(`${this.httpUrl}/get_login_info`);
-            this.info = (await res.json())['data'];
+            const res = await this.send({ action: 'get_login_info' });
+            this.info = res['data'];
         } catch (e) {
             logger('robot').error("登录信息获取失败！");
             logger('robot').error(e);
@@ -114,35 +157,49 @@ export class Robot {
     }
 
     send(content:object) {
+        content['echo'] = uuidv4();
+        const result = new Promise((resolve, reject) => {
+            const onMessage = data => {
+                data = JSON.parse(data);
+                if (data.echo === content['echo']) {
+                    this.ws.off('message', onMessage);
+                    resolve(data);
+                }
+            }
+            this.ws.on('message', onMessage);
+            setTimeout(() => {
+                this.ws.off('message', onMessage);
+                reject('WebSocket Timeout!');
+            }, Robot.webSocketTimeout);
+        });
         this.ws.send(JSON.stringify(content));
+        return result;
     }
 
     async sendPrivate(str: string, id: string) {
         // 如果太长，分段发送
         const splitList = Robot.splitString(str);
         for (const split of splitList) {
-            this.send({
+            await this.send({
                 action: 'send_private_msg',
                 params: {
                     user_id: id,
                     message: split,
                 },
             });
-            await sleep(200);
         }
     }
 
     async sendGroup(str: string, id: string) {
         const splitList = Robot.splitString(str);
         for (const split of splitList) {
-            this.send({
+            await this.send({
                 action: 'send_group_msg',
                 params: {
                     group_id: id,
                     message: split,
                 },
             });
-            await sleep(200);
         }
     }
 }

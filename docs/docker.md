@@ -1,7 +1,7 @@
 # Docker部署教程
 ## 前提
 - 已经安装好docker和docker-compose（也可以自己写docker指令）
-- 已经部署好go-cqhttp，并且配置了http和ws（正向ws）两个通讯方式
+- 已经部署好go-cqhttp，并且配置了ws（正向ws）两个通讯方式
 ## 1. 拉取镜像
 ```bash
 docker pull pairzhu/gptrobot
@@ -28,9 +28,7 @@ services:
             - './config:/GPT/config'
             - './logs:/GPT/logs'
         environment:
-# URL的末尾不要加斜杠
             - WS_URL=ws://改成你配置的URL
-            - HTTP_URL=http://改成你配置的URL
 # 如果你在国内需要用代理，请取消下面一行的注释并修改为你的代理地址
 #            - PROXY=http://代理地址:端口
 # 如果你在国内，并且不方便使用代理，可以使用第三方的接口（本人不对第三方API的安全性负责）
@@ -44,8 +42,8 @@ services:
         image: 'pairzhu/gptrobot'
 ```
 查看目前已收集的第三方api地址 [查看](./api.md)  
-其中，`WS_URL`和`HTTP_URL`分别是你go-cqhttp的ws和http的URL。  
-如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080`，`HTTP_URL=http://127.0.0.1:5700`
+其中，`WS_URL`是你go-cqhttp配置的ws通讯的URL。  
+如果go-cqhttp用的推荐，且cq和本项目部署在同一台主机上那么，`WS_URL=ws://127.0.0.1:8080`
 ## 3. 启动
 ```bash
 docker-compose up -d

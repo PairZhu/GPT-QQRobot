@@ -23,9 +23,6 @@ __带"*"加粗的参数为必须配置的参数__
 - __* websocket连接地址__:
     > 末尾不要加斜杆
     - 环境变量: `WS_URL`
-- __* http连接地址__:
-    > 末尾不要加斜杠
-    - 环境变量: `HTTP_URL`
 - __* OpenAI API Key__:
     - 配置文件(`api_keys.txt`): 一行一个API Key 
 - OpenAI API基地址:

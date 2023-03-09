@@ -5,8 +5,7 @@ services:
             - './config:/GPT/config'
             - './logs:/GPT/logs'
         environment:
-            - WS_URL=ws://<改成你配置的URL>
-            - HTTP_URL=http://<改成你配置的URL>
+            - WS_URL=ws://改成你配置的URL
         container_name: gptrobot
         restart: always
         image: 'pairzhu/gptrobot'

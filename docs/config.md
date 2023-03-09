@@ -35,12 +35,12 @@ __带"*"加粗的参数为必须配置的参数__
 - 代理地址:
     - 环境变量: `PROXY`
 - 最大上下文消耗Token数:
-    - 环境变量: `DEFAULT_MAX_PROMPTS`
     - 配置文件(`db.json`): `maxPrompts`
+    - 环境变量: `DEFAULT_MAX_PROMPTS`
     - 源码修改: `DEFAULT_MAX_PROMPTS`
 - 最大对话消耗Token数:
-    - 环境变量: `DEFAULT_MAX_TOKENS`
     - 配置文件(`db.json`): `maxTokens`
+    - 环境变量: `DEFAULT_MAX_TOKENS`
     - 源码修改: `DEFAULT_MAX_TOKENS`
 - 私聊、群聊自动开始对话（布尔值）
     > 私聊时，无须输入命令自动开始对话
@@ -66,16 +66,16 @@ __带"*"加粗的参数为必须配置的参数__
     >personal: 个人模式，每个用户一个对话  
     >party: 派对模式，所有用户共享一个对话  
     >disable: 禁止模式，不响应群聊消息
-    - 环境变量: `GROUP_MODE`
     - 配置文件(`db.json`): `groupMode`
+    - 环境变量: `GROUP_MODE`
     - 源码修改: `GROUP_MODE`
 - 群聊响应方式（"always"、"never"、"message"、"command"三选一）:
     >always: 命令和聊天都需要@机器人
     >never: 命令和聊天都不需要@机器人
     >message: 聊天需要@机器人，命令不需要
     >command: 命令需要@机器人，聊天不需要
-    - 环境变量: `AT_MODE`
     - 配置文件(`db.json`): `atMode`
+    - 环境变量: `AT_MODE`
     - 源码修改: `AT_MODE`
 
 - LUR缓存大小（如果主机内存小可以适当调小，如果主机内存大且用户量大可以适当调高）:

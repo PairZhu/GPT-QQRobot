@@ -1,6 +1,5 @@
 import { DB } from './utils/db.js';
 import { emptyOr, logger } from './utils/utils.js';
-import { CONSTANT } from "./utils/constant.js";
 import { GPT } from './gpt.js';
 import { setting, ChatMode } from './setting.js';
 import fs from 'fs';

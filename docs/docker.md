@@ -34,8 +34,10 @@ services:
 # 如果你在国内，并且不方便使用代理，可以使用第三方的接口（本人不对第三方API的安全性负责）
 #            - API_BASE_PATH=第三方api地址
 # （以下为可选配置，配置上下文长度限制和回答消耗token数限制）
-#            - DEFAULT_MAX_PROMPTS=整数（默认为600）
-#            - DEFAULT_MAX_TOKENS=整数（默认为400）
+#            - MAX_PROMPTS=整数（默认为600）
+#            - MAX_TOKENS=整数（默认为400）
+# 如果你允许生成图片，请取消下面一行的注释，并把值设置为256，512，1024中的一个（只能为这三个其中一个）
+#            - IMAGE_SIZE=图片尺寸
         container_name: gptrobot
         network_mode: "host"
         restart: always

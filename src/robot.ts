@@ -158,19 +158,27 @@ export class Robot {
 
     send(content:object) {
         content['echo'] = uuidv4();
-        const result = new Promise((resolve, reject) => {
+        const result = new Promise(resolve => {
+            const timeoutID = setTimeout(() => {
+                this.ws.off('message', onMessage);
+                logger('robot').error("WebSocket Timeout!");
+                resolve({
+                    status: false,
+                    msg: 'WebSocket Timeout!'
+                });
+            }, Robot.webSocketTimeout);
             const onMessage = data => {
                 data = JSON.parse(data);
                 if (data.echo === content['echo']) {
+                    clearTimeout(timeoutID);
                     this.ws.off('message', onMessage);
-                    resolve(data);
+                    resolve({
+                        status: true,
+                        data: data.data,
+                    });
                 }
             }
             this.ws.on('message', onMessage);
-            setTimeout(() => {
-                this.ws.off('message', onMessage);
-                reject('WebSocket Timeout!');
-            }, Robot.webSocketTimeout);
         });
         this.ws.send(JSON.stringify(content));
         return result;

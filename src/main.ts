@@ -23,7 +23,7 @@ await global.gpt.init();
 
 setting.init();
 
-global.userCache = new LURCache<string, User>({ max: emptyOr(parseInt(process.env.MAX_USER_CACHE), CONSTANT.DEFAULT_MAX_USER_CACHE) });
+global.userCache = new LURCache<string, User>({ max: emptyOr(parseInt(process.env.MAX_USER_CACHE), CONSTANT.MAX_USER_CACHE) });
 global.chattingUsers = new Set<string>();
 
 if (!setting.groupMode) {

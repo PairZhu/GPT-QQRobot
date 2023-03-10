@@ -2,13 +2,14 @@ import { Configuration, OpenAIApi } from "openai";
 import fs from "fs";
 import readline from "readline";
 import { logger } from "./utils/utils.js";
-import { setting } from "./setting.js";
+import { setting, validImageSize } from "./setting.js";
 import HttpsProxyAgent from 'https-proxy-agent';
 
 export class GPT {
     private openai: OpenAIApi;
     private apiKeys: Array<string> = [];
     private apiKeyIndex: number = 0;
+    private axiosConfig;
 
     async init(): Promise<boolean> {
         if (!fs.existsSync('config')) {
@@ -36,6 +37,11 @@ export class GPT {
             apiKey: this.apiKeys[this.apiKeyIndex],
             basePath: process.env.API_BASE_PATH,
         }));
+        this.axiosConfig = process.env.PROXY ? {
+            proxy: false,
+            httpAgent: HttpsProxyAgent(process.env.PROXY),
+            httpsAgent: HttpsProxyAgent(process.env.PROXY)
+        } : undefined
         return true;
     }
 
@@ -53,24 +59,11 @@ export class GPT {
         return this.apiKeys;
     }
 
-    async chatCompletion(params) {
+    async tryAllKeys(callback: Function) {
         while (this.apiKeyIndex < this.apiKeys.length) {
             try {
-                const { data } = await this.openai.createChatCompletion(
-                    {
-                        model: "gpt-3.5-turbo",
-                        max_tokens: setting.maxTokens,
-                        ...params,
-                    }, process.env.PROXY ? {
-                        proxy: false,
-                        httpAgent: HttpsProxyAgent(process.env.PROXY),
-                        httpsAgent: HttpsProxyAgent(process.env.PROXY)
-                    } : undefined
-                );
-                return ({
-                    text: data.choices[0].message.content.trim(),
-                    usage: data.usage
-                });
+                const res = await callback();
+                return res;
             } catch (e) {
                 logger('gpt').error(`apiKey(${this.apiKeys[this.apiKeyIndex]})请求失败，错误信息：${e.message}`);
                 this.apiKeyIndex++;
@@ -86,5 +79,34 @@ export class GPT {
         this.apiKeyIndex = 0;
         logger('gpt').error(`所有apiKey均请求失败`);
         return null;
+    }
+
+    async imageGeneration(params) {
+        const imgSize = `${setting.imageSize}x${setting.imageSize}`
+        return await this.tryAllKeys(async () => {
+            const { data } = await this.openai.createImage({
+                size: imgSize,
+                n: 1,
+                ...params,
+            }, this.axiosConfig);
+            return ({
+                url: data.data[0].url,
+                usage: validImageSize[setting.imageSize],
+            });
+        })
+    }
+
+    async chatCompletion(params) {
+        return await this.tryAllKeys(async () => {
+            const { data } = await this.openai.createChatCompletion({
+                model: "gpt-3.5-turbo",
+                max_tokens: setting.maxTokens,
+                ...params,
+            }, this.axiosConfig);
+            return ({
+                text: data.choices[0].message.content.trim(),
+                usage: data.usage
+            });
+        });
     }
 }

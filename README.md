@@ -22,6 +22,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 - [x] 群聊派对/个人/禁止模式
 - [x] 自带代理配置
 - [x] 限制对话消耗的token数量
+- [x] AI图片生成
 - [ ] 回答图片渲染（待开发）
 - [ ] 管理员功能和权限（待开发）
 
@@ -30,6 +31,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 - [2023/3/8 12:00] 发现文档里给的已经恢复，并更新了新的第三方接口
 - [2023/3/8 16:00] 2023年3月8日13:00到16:00之间下载的源码有严重bug：群聊无法回复消息，如果这个期间下载的源码的请重新拉取新的源码
 - [2023/3/9 23:25] 优化了和CQ-HTTP的连接，不再需要http通讯方式，只需要ws（正向ws）即可，优化了消息分片算法，和消息排序算法
+- [2023/3/10 19:00] 修改配置名称 DEFAULT_MAX_TOKENS为MAX_TOKENS，DEFAULT_MAX_PROMPTS为MAX_PROMPTS，DEFAULT_MAX_USER_CACHE改为MAX_USER_CACHE，增加AI图片功能
 ## 🚀使用教程
 ### 1. 注册
 注册OpenAI账号，获取API Key [具体教程](./docs/register.md)。

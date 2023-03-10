@@ -2,6 +2,7 @@ import { DB } from './utils/db.js';
 import { emptyOr, logger } from './utils/utils.js';
 import { GPT } from './gpt.js';
 import { setting, ChatMode } from './setting.js';
+import { v5 as uuidv5 } from 'uuid';
 import fs from 'fs';
 
 export interface Conversation {
@@ -20,6 +21,8 @@ export class User {
     private db: DB;
     private conversations: Array<Conversation>;
     private currentConversation: Conversation;
+    private images: Array<[string, string]>;
+    private uuid: string;
     private temperature: number;
     private top_p: number;
     private frequency_penalty: number;
@@ -27,7 +30,6 @@ export class User {
     private gpt: GPT;
     private mode: ChatMode;
     public busy: boolean = false;
-
 
     constructor(id: string, gpt: GPT) {
         this.id = id;
@@ -48,6 +50,11 @@ export class User {
         this.mode = ChatMode[this.db.get('mode')];
         this.conversations = this.db.get('conversations') || [];
         this.currentConversation = this.db.get('currentConversation', undefined);
+        this.images = this.db.get('images') || [];
+        this.uuid = this.db.get('uuid') || uuidv5(this.id, uuidv5.URL);
+        if (!this.db.get('uuid')) {
+            await this.db.set('uuid', this.uuid);
+        }
     }
 
     getInfo() {
@@ -158,6 +165,22 @@ export class User {
         await this.db.set('currentConversation', this.currentConversation);
     }
 
+    async getImage(prompt: string): Promise<string> {
+        logger('user').debug(`正在生成[${this.id}]描述的图片:\n${prompt}`)
+        const res = await this.gpt.imageGeneration({
+            prompt: prompt,
+            user: this.uuid,
+        });
+        if(!res) {
+            return '出错了，请稍后再试，或联系管理员';
+        }
+        logger('user').debug(`[${this.id}]的图片生成结果:\n${res.url}`);
+        logger('usage').info(`[${this.id}]消耗余额\$${res.usage}`);
+        this.images.push([prompt, res.url]);
+        await this.db.set('images', this.images);
+        return `[CQ:image,file=${res.url}]`;
+    }
+
     async getAnswer(question: string): Promise<string> {
         if (this.busy) {
             return '我还在回答上一个问题呢，请稍后再试。';
@@ -177,12 +200,14 @@ export class User {
             top_p: conversation.top_p,
             frequency_penalty: conversation.frequency_penalty,
             presence_penalty: conversation.presence_penalty,
+            user: this.uuid,
         });
         this.busy = false;
         if (!res) {
             return '出错了，请稍后再试，或联系管理员';
         }
-        logger('user').debug(`[${this.id}]的回答结果:\n${res.text}`)
+        logger('user').debug(`[${this.id}]的回答结果:\n${res.text}`);
+        logger('usage').info(`[${this.id}]消耗tokens:{total:${res.usage.total_tokens},prompt:${res.usage.prompt_tokens},completion:${res.usage.completion_tokens}}`);
         // 如果conversation已经被切换，说明用户已经开始了新的对话，那么就不保存这次的对话
         if (conversation !== this.currentConversation) {
             return res.text;
@@ -210,7 +235,6 @@ export class User {
                 conversation.data.pop();
                 break;
         }
-        logger('usage').info(`[${this.id}]消耗tokens:{total:${res.usage.total_tokens},prompt:${res.usage.prompt_tokens},completion:${res.usage.completion_tokens}}`)
 
         return tip + res.text;
     }

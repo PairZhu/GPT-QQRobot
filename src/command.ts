@@ -1,7 +1,7 @@
 import { CONSTANT } from "./utils/constant.js";
 import { User, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
-import { ChatMode } from "./setting.js";
+import { ChatMode, setting } from "./setting.js";
 export interface Command {
     name: string;
     description: string;
@@ -229,6 +229,23 @@ export const commandList: Array<Command> = [
             return `对话人设已设置为：${prefix}\n\n将在新创建的对话中生效`;
         },
         help: `char [人设]: 设置对话人设，将在新创建的对话中生效，例如: ${CONSTANT.COMMAND_PREFIX}char ${CONSTANT.DEFAULT_PREFIX}`
+    },
+    {
+        name: "img",
+        description: "生成图片",
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            let prompt = originStr.replace(/^\s+/, '').slice(this.name.length + 1);
+            if (setting.imageSize === 0) {
+                return '管理员已禁用图片生成功能';
+            }
+            if (!prompt) {
+                return `缺少图片描述，请输入${CONSTANT.COMMAND_PREFIX}help img查看帮助信息`;
+            }
+            const user = await preparedUser(userId);
+            const res = await user.getImage(prompt);
+            return res;
+        },
+        help: `img [图片描述]: 生成图片，例如: ${CONSTANT.COMMAND_PREFIX}img A cute baby sea otter`
     },
     {
         name: 'history',

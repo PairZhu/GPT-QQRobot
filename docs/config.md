@@ -33,12 +33,17 @@ __带"*"加粗的参数为必须配置的参数__
     - 环境变量: `PROXY`
 - 最大上下文消耗Token数:
     - 配置文件(`db.json`): `maxPrompts`
-    - 环境变量: `DEFAULT_MAX_PROMPTS`
-    - 源码修改: `DEFAULT_MAX_PROMPTS`
+    - 环境变量: `MAX_PROMPTS`
+    - 源码修改: `MAX_PROMPTS`
 - 最大对话消耗Token数:
     - 配置文件(`db.json`): `maxTokens`
-    - 环境变量: `DEFAULT_MAX_TOKENS`
-    - 源码修改: `DEFAULT_MAX_TOKENS`
+    - 环境变量: `MAX_TOKENS`
+    - 源码修改: `MAX_TOKENS`
+- 图片尺寸
+    > # 如果你允许生成图片，请把值设置为256，512，1024中的一个（只能三选一）。特别的， 0 代表禁止图片
+    - 配置文件(`db.json`): `imageSize`
+    - 环境变量: `IMAGE_SIZE`
+    - 源码修改: `IMAGE_SIZE`
 - 私聊、群聊自动开始对话（布尔值）
     > 私聊时，无须输入命令自动开始对话
     > 如果不需要，请勿配置此项，如果此项环境变量中设置值任意值都会被视为true，包括false、0、""等
@@ -76,8 +81,8 @@ __带"*"加粗的参数为必须配置的参数__
     - 源码修改: `AT_MODE`
 
 - LUR缓存大小（如果主机内存小可以适当调小，如果主机内存大且用户量大可以适当调高）:
-    - 环境变量: `DEFAULT_MAX_USER_CACHE`
-    - 源码修改: `DEFAULT_MAX_USER_CACHE`
+    - 环境变量: `MAX_USER_CACHE`
+    - 源码修改: `MAX_USER_CACHE`
 
 ## 4. 补充
 参数含义如有不太清楚的，运行后可以通过help命令查看帮助

@@ -43,6 +43,7 @@ export const setting = {
     defaultPrefix: undefined,
     defaultMode: undefined,
     imageSize: undefined,
+    maxImages: undefined,
 
     init() {
         this.maxTokens = emptyOr(global.db.get('maxTokens'), parseInt(process.env.MAX_TOKENS), CONSTANT.MAX_TOKENS);
@@ -58,7 +59,7 @@ export const setting = {
         this.defaultPrefix = emptyOr(global.db.get('defaultPrefix'), CONSTANT.DEFAULT_PREFIX);
         this.defaultMode = ChatMode[emptyOr(global.db.get('defaultMode'), process.env.DEFAULT_MODE, CONSTANT.DEFAULT_MODE)];
         this.imageSize = emptyOr(global.db.get('imageSize'), parseInt(process.env.IMAGE_SIZE), CONSTANT.IMAGE_SIZE);
-
+        this.maxImages = emptyOr(global.db.get('maxImages'), parseInt(process.env.MAX_IMAGES), CONSTANT.MAX_IMAGES);
         if (!(this.imageSize in validImageSize)) {
             this.imageSize = CONSTANT.IMAGE_SIZE;
             logger('master').error(`非法的图片尺寸: ${this.imageSize}，使用默认值: ${CONSTANT.IMAGE_SIZE}`);

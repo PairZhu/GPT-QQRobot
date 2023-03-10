@@ -2,6 +2,7 @@ import { CONSTANT } from "./utils/constant.js";
 import { User, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
 import { ChatMode, setting } from "./setting.js";
+import { imageChatConversation } from "./image-chat.js";
 export interface Command {
     name: string;
     description: string;
@@ -236,7 +237,7 @@ export const commandList: Array<Command> = [
         deal: async function (userId: string, originStr: string, ...args: Array<string>) {
             let prompt = originStr.replace(/^\s+/, '').slice(this.name.length + 1);
             if (setting.imageSize === 0) {
-                return '管理员已禁用图片生成功能';
+                return '管理员未开启图片生成功能';
             }
             if (!prompt) {
                 return `缺少图片描述，请输入${CONSTANT.COMMAND_PREFIX}help img查看帮助信息`;
@@ -340,6 +341,23 @@ export const commandList: Array<Command> = [
         },
         argNums: new Set([0]),
         help: `reset: 重置用户参数，将在新创建的对话中生效`
+    },
+    {
+        name: 'imgchat',
+        description: '开启图片对话',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            if(setting.maxImages === 0 || setting.imageSize === 0) {
+                return '管理员未开启图片对话功能';
+            }
+            const user = await preparedUser(userId);
+            user.setConversation(imageChatConversation);
+            if(!global.chattingUsers.has(userId)) {
+                global.chattingUsers.add(userId);
+            }
+            return '图片对话已开启，机器人将可以在聊天的时候发送图片，但不能读取图片';
+        },
+        argNums: new Set([0]),
+        help: `imgchat: 开启图片对话，开启后机器人将可以在聊天的时候发送图片，但不能读取图片`
     }
 ];
 

@@ -10,6 +10,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 </div>
 
 ## 💥功能  
+- [x] 图片聊天功能 ✨
 - [x] docker一键部署
 - [x] 使用ChatGPT(GPT-3.5)模型接口
 - [x] 连续对话（三种对话模式）
@@ -32,6 +33,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 - [2023/3/8 16:00] 2023年3月8日13:00到16:00之间下载的源码有严重bug：群聊无法回复消息，如果这个期间下载的源码的请重新拉取新的源码
 - [2023/3/9 23:25] 优化了和CQ-HTTP的连接，不再需要http通讯方式，只需要ws（正向ws）即可，优化了消息分片算法，和消息排序算法
 - [2023/3/10 19:00] 修改配置名称 DEFAULT_MAX_TOKENS为MAX_TOKENS，DEFAULT_MAX_PROMPTS为MAX_PROMPTS，DEFAULT_MAX_USER_CACHE改为MAX_USER_CACHE，增加AI图片功能
+- [2023/3/10 22:40] 增加图片聊天功能，可以在聊天的同时使用AI图片生成器生成图片（chatGPT自动生成的prompt）
 ## 🚀使用教程
 ### 1. 注册
 注册OpenAI账号，获取API Key [具体教程](./docs/register.md)。
@@ -54,13 +56,10 @@ __不会配置的请使用参考配置！！！__
 默认群聊模式为派对模式，同一群聊内的所有人共享一个对话状态  
 默认配置下群聊需要@机器人才能触发对话（每次对话都需要），但是命令不需要@（加上也不影响）
 ## ✨实际效果
-### 视频演示
-
-[![B站演示视频](https://i0.hdslb.com/bfs/archive/4e5a82609ec92ef92812cce93be221efe556ea69.png@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1io4y1z7GG)
-
+### 图片聊天
+![图片聊天](./docs/images/imgchat.png)
 ### 私聊+存档
 ![私聊](./docs/images/private.png)
-
 ### 分享存档
 ![分享](./docs/images/share.png)
 ### 群聊+导入分享

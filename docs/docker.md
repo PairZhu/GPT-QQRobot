@@ -38,6 +38,8 @@ services:
 #            - MAX_TOKENS=整数（默认为400）
 # 如果你允许生成图片，请取消下面一行的注释，并把值设置为256，512，1024中的一个（只能为这三个其中一个）
 #            - IMAGE_SIZE=图片尺寸
+# 如果你允许图片聊天，请把它设为非零值（机器人一次回答最多生成的图片数量），0代表禁止图片聊天
+#            - MAX_IMAGES=单次回答最大图片数量
         container_name: gptrobot
         network_mode: "host"
         restart: always

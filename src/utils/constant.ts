@@ -14,4 +14,5 @@ export const CONSTANT = {
     AUTO_PRIVATE: false,
     AUTO_GROUP: false,
     IMAGE_SIZE: 0,
+    MAX_IMAGES: 0,
 }

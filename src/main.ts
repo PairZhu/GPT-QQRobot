@@ -9,6 +9,7 @@ import { emptyOr, logger } from './utils/utils.js';
 import { AtMode, GroupMode, setting } from './setting.js';
 import LURCache from 'lru-cache';
 import fs from 'fs';
+import { imageChatConversation, imageConvert } from './image-chat.js';
 
 dotenv.config();
 
@@ -74,7 +75,10 @@ const dealMessage = async (
             global.chattingUsers.add(userId);
             await user.beginConversation();
         }
-        const res = await user.getAnswer(message);
+        let res =  await user.getAnswer(message);
+        if(user.getConversation().title === imageChatConversation.title) {
+            res = imageConvert(res,user);
+        }
         return res;
     }
     return null;

@@ -192,7 +192,7 @@ export class User {
         conversation.data.forEach(([q, a]) => {
             messages.push({'role':'user','content':q});
             messages.push({'role':'assistant','content':a});
-        })
+        });
         messages.push({'role':'user','content':question});
         const res = await this.gpt.chatCompletion({
             messages,
@@ -202,14 +202,15 @@ export class User {
             presence_penalty: conversation.presence_penalty,
             user: this.uuid,
         });
-        this.busy = false;
         if (!res) {
+            this.busy = false;
             return '出错了，请稍后再试，或联系管理员';
         }
         logger('user').debug(`[${this.id}]的回答结果:\n${res.text}`);
         logger('usage').info(`[${this.id}]消耗tokens:{total:${res.usage.total_tokens},prompt:${res.usage.prompt_tokens},completion:${res.usage.completion_tokens}}`);
         // 如果conversation已经被切换，说明用户已经开始了新的对话，那么就不保存这次的对话
         if (conversation !== this.currentConversation) {
+            this.busy = false;
             return res.text;
         }
         conversation.data.push([question, res.text]);
@@ -235,7 +236,7 @@ export class User {
                 conversation.data.pop();
                 break;
         }
-
+        this.busy = false;
         return tip + res.text;
     }
 

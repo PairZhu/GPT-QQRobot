@@ -3,10 +3,10 @@ import { sleep, logger } from "./utils/utils.js";
 import { v4 as uuidv4 } from 'uuid';
 
 export class Robot {
-    private static maxSplit = 1000;
-    private static minSplit = 850;
+    private static maxSplit = 2000;
+    private static minSplit = 1800;
     // 越靠前的分隔符优先级越高
-    private static splitCharList = ['\n',',','，','.','。','!','！','?','？',' ','\t'];
+    private static splitCharList = ['\n',', ','，','. ','。','! ','！','? ','？',' ','\t'];
     private static webSocketTimeout = 30 * 1000;
     private ws: ws;
     private wsUrl: string;
@@ -21,7 +21,7 @@ export class Robot {
             let index = Robot.maxSplit;
             // 遍历所有分隔符
             for (let splitChar of Robot.splitCharList) {
-                const splitIndex = str.lastIndexOf(splitChar, Robot.maxSplit-1)+1;
+                const splitIndex = str.lastIndexOf(splitChar, Robot.maxSplit-splitChar.length)+splitChar.length;
                 if (splitIndex > Robot.minSplit) {
                     index = splitIndex;
                     break;

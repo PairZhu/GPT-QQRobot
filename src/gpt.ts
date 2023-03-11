@@ -41,7 +41,7 @@ export class GPT {
             proxy: false,
             httpAgent: HttpsProxyAgent(process.env.PROXY),
             httpsAgent: HttpsProxyAgent(process.env.PROXY)
-        } : undefined
+        } : undefined;
         return true;
     }
 

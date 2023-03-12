@@ -179,6 +179,9 @@ export const commandList: Array<Command> = [
             }
             const user = await preparedUser(userId);
             const conversation = user.getConversation();
+            if (conversation.data.length === 0) {
+                return '当前对话没有对话记录';
+            }
             const [question] = conversation.data.pop();
             const res = await user.getAnswer(question);
             return res;
@@ -195,6 +198,9 @@ export const commandList: Array<Command> = [
             }
             const user = await preparedUser(userId);
             const conversation = user.getConversation();
+            if (conversation.data.length === 0) {
+                return '当前对话没有对话记录';
+            }
             const [question, answer] = conversation.data.pop();
             user.setConversation(conversation);
             return `已撤销上一次对话：\nuser: ${question}\nassistant: ${answer}`;

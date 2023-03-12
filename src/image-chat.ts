@@ -35,7 +35,7 @@ export const imageConvert = async (text: string, user: User) => {
         const prompt = match.replace('{IMG:', '').replace('}', '');
         // 如果没超过最大个数，就继续生成图片
         let res;
-        if (cnt++ <= setting.maxImages) {
+        if (++cnt <= setting.maxImages) {
             res = await user.getImage(prompt);
         } else {
             res = '图片生成个数超过限制';

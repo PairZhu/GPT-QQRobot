@@ -237,6 +237,9 @@ export class User {
                 break;
         }
         this.busy = false;
+        if(process.env.NO_TIP) {
+            return res.text;
+        }
         return tip + res.text;
     }
 

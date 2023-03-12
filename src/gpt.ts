@@ -60,13 +60,14 @@ export class GPT {
     }
 
     async tryAllKeys(callback: Function) {
-        while (this.apiKeyIndex < this.apiKeys.length) {
+        let try_cnt = 0;
+        while (try_cnt++ < this.apiKeys.length) {
             try {
                 const res = await callback();
                 return res;
             } catch (e) {
                 logger('gpt').error(`apiKey(${this.apiKeys[this.apiKeyIndex]})请求失败，错误信息：${e.message}`);
-                this.apiKeyIndex++;
+                this.apiKeyIndex = (this.apiKeyIndex + 1) % this.apiKeys.length;
                 if (this.apiKeyIndex < this.apiKeys.length) {
                     logger('usage').info(`切换API Key为${this.apiKeys[this.apiKeyIndex]}`);
                 }
@@ -76,7 +77,6 @@ export class GPT {
                 }));
             }
         }
-        this.apiKeyIndex = 0;
         logger('gpt').error(`所有apiKey均请求失败`);
         return null;
     }

@@ -383,6 +383,6 @@ export async function dealCommand(userId: string, commandStr: string): Promise<s
         return res;
     } else {
         logger('command').warn(`未找到该命令"${args[0]}"`);
-        return `未找到该命令"${args[0]}"`;
+        return `未找到该命令"${args[0]}，请输入${CONSTANT.COMMAND_PREFIX}help查看命令列表"`;
     }
 }

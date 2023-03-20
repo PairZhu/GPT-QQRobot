@@ -4,6 +4,7 @@ import readline from "readline";
 import { logger } from "./utils/utils.js";
 import { setting, validImageSize } from "./setting.js";
 import HttpsProxyAgent from 'https-proxy-agent';
+import { CONSTANT } from "./utils/constant.js";
 
 export class GPT {
     private openai: OpenAIApi;
@@ -40,7 +41,8 @@ export class GPT {
         this.axiosConfig = process.env.PROXY ? {
             proxy: false,
             httpAgent: HttpsProxyAgent(process.env.PROXY),
-            httpsAgent: HttpsProxyAgent(process.env.PROXY)
+            httpsAgent: HttpsProxyAgent(process.env.PROXY),
+            timeout: process.env.TIMEOUT || CONSTANT.TIMEOUT,
         } : undefined;
         return true;
     }

@@ -9,7 +9,6 @@ import { emptyOr, logger } from './utils/utils.js';
 import { AtMode, GroupMode, setting } from './setting.js';
 import LURCache from 'lru-cache';
 import fs from 'fs';
-import { imageChatConversation, imageConvert } from './image-chat.js';
 
 dotenv.config();
 
@@ -59,30 +58,31 @@ const dealMessage = async (
     allowCommand: boolean = true,
     allowChat: boolean = true,
 ) => {
-    if (message.startsWith(CONSTANT.COMMAND_PREFIX) && allowCommand) {
-        const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
-        const res = await dealCommand(userId, commandStr);
-        return res;
+    try {
+        if (message.startsWith(CONSTANT.COMMAND_PREFIX) && allowCommand) {
+            const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
+            const res = await dealCommand(userId, commandStr);
+            return res;
+        }
+        if (allowChat) {
+            let user = global.userCache.get(userId);
+            if (!user) {
+                user = new User(userId, global.gpt);
+                await user.init();
+                global.userCache.set(userId, user);
+            }
+            if (!global.chattingUsers.has(userId)) {
+                global.chattingUsers.add(userId);
+                await user.beginConversation();
+            }
+            let res =  await user.getAnswer(message);
+            return res;
+        }
+        return null;
+    } catch (e) {
+        logger('master').error(e);
+        return null;
     }
-    if (allowChat) {
-        let user = global.userCache.get(userId);
-        if (!user) {
-            user = new User(userId, global.gpt);
-            await user.init();
-            global.userCache.set(userId, user);
-        }
-        if (!global.chattingUsers.has(userId)) {
-            global.chattingUsers.add(userId);
-            await user.beginConversation();
-        }
-        let res =  await user.getAnswer(message);
-        if(user.getConversation().title === imageChatConversation.title) {
-            res = imageConvert(res,user);
-        }
-        return res;
-    }
-    return null;
-
 }
 
 global.robot.on('private_message', async (data) => {

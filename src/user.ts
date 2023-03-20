@@ -2,6 +2,7 @@ import { DB } from './utils/db.js';
 import { emptyOr, logger } from './utils/utils.js';
 import { GPT } from './gpt.js';
 import { setting, ChatMode } from './setting.js';
+import { imageChatConversation, imageConvert } from './image-chat.js';
 import { v5 as uuidv5 } from 'uuid';
 import fs from 'fs';
 
@@ -80,6 +81,7 @@ export class User {
     async setConversation(conversation: Conversation) {
         // 深拷贝一份
         this.currentConversation = JSON.parse(JSON.stringify(conversation));
+        this.busy = false;
         await this.db.set('currentConversation', this.currentConversation);
     }
 
@@ -211,9 +213,15 @@ export class User {
         // 如果conversation已经被切换，说明用户已经开始了新的对话，那么就不保存这次的对话
         if (conversation !== this.currentConversation) {
             this.busy = false;
+            if(conversation.title === imageChatConversation.title) {
+                res.text = await imageConvert(res.text,this);
+            }
             return res.text;
         }
         conversation.data.push([question, res.text]);
+        if(conversation.title === imageChatConversation.title) {
+            res.text = await imageConvert(res.text,this);
+        }
         let tip = '';
         switch (emptyOr(this.mode, setting.defaultMode)) {
             case ChatMode.pop_front:
@@ -238,7 +246,7 @@ export class User {
         }
         this.busy = false;
         if(process.env.NO_TIP) {
-            return res.text;
+            tip = '';
         }
         return tip + res.text;
     }

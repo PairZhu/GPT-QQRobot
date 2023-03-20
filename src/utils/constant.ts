@@ -15,4 +15,5 @@ export const CONSTANT = {
     AUTO_GROUP: false,
     IMAGE_SIZE: 0,
     MAX_IMAGES: 0,
+    TIMEOUT: 30*1000,
 }

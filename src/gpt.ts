@@ -1,7 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
-import fs from "fs";
-import readline from "readline";
-import { logger } from "./utils/utils.js";
+import { logger, readLineFile } from "./utils/utils.js";
 import { setting, validImageSize } from "./setting.js";
 import HttpsProxyAgent from 'https-proxy-agent';
 import { CONSTANT } from "./utils/constant.js";
@@ -13,22 +11,8 @@ export class GPT {
     private axiosConfig;
 
     async init(): Promise<boolean> {
-        if (!fs.existsSync('config')) {
-            fs.mkdirSync('config');
-        }
-        if (!fs.existsSync('config/api_keys.txt')) {
-            fs.writeFileSync('config/api_keys.txt', '');
-        }
         // 一行一个key，忽略空行和空格
-        const lineReader = readline.createInterface({
-            input: fs.createReadStream('config/api_keys.txt')
-        });
-        lineReader.on('line', (line) => {
-            if (line.trim() !== '') {
-                this.apiKeys.push(line.trim());
-            }
-        });
-        await new Promise<void>(resolve => lineReader.on('close', () => resolve()));
+        this.apiKeys = await readLineFile('api_keys.txt');
         if (this.apiKeys.length === 0) {
             logger('gpt').error('没有发现API Key，请在config/api_keys.txt中添加');
             return false;
@@ -45,16 +29,6 @@ export class GPT {
             timeout: process.env.TIMEOUT || CONSTANT.TIMEOUT,
         };
         return true;
-    }
-
-    addKey(key: string) {
-        this.apiKeys.push(key);
-        fs.writeFileSync('config/api_keys.txt', this.apiKeys.join('\n'));
-    }
-
-    deleteKey(key: string) {
-        this.apiKeys = this.apiKeys.filter(k => k !== key);
-        fs.writeFileSync('config/api_keys.txt', this.apiKeys.join('\n'));
     }
 
     getKeys(): Array<string> {

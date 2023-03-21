@@ -1,4 +1,4 @@
-import { emptyOr, logger } from './utils/utils.js';
+import { emptyOr, logger, readLineFile, writeLineFile } from './utils/utils.js';
 import { CONSTANT } from './utils/constant.js';
 
 export enum GroupMode {
@@ -44,8 +44,10 @@ export const setting = {
     defaultMode: undefined,
     imageSize: undefined,
     maxImages: undefined,
+    disableGroup: undefined,
+    disableQQ: undefined,
 
-    init() {
+    async init() {
         this.maxTokens = emptyOr(global.db.get('maxTokens'), parseInt(process.env.MAX_TOKENS), CONSTANT.MAX_TOKENS);
         this.maxPrompts = emptyOr(global.db.get('maxPrompts'), parseInt(process.env.MAX_PROMPTS), CONSTANT.MAX_PROMPTS);
         this.groupMode = GroupMode[emptyOr(global.db.get('groupMode'), process.env.GROUP_MODE, CONSTANT.GROUP_MODE)];
@@ -64,7 +66,8 @@ export const setting = {
             this.imageSize = CONSTANT.IMAGE_SIZE;
             logger('master').error(`非法的图片尺寸: ${this.imageSize}，使用默认值: ${CONSTANT.IMAGE_SIZE}`);
         }
-        
+        this.disableGroup = await readLineFile('disable_group.txt');
+        this.disableQQ = await readLineFile('disable_qq.txt');
     },
 
     async set(key: string, value: any) {
@@ -80,6 +83,14 @@ export const setting = {
                 }
                 this.imageSize = value;
                 await global.db.set(key, value);
+                break;
+            case 'disableGroup':
+                this.disableGroup = value;
+                await writeLineFile('disable_group.txt', value);
+                break;
+            case 'disableQQ':
+                this.disableQQ = value;
+                await writeLineFile('disable_qq.txt', value);
                 break;
             default:
                 this[key] = value;

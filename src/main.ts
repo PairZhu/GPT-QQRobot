@@ -21,7 +21,7 @@ await global.robot.init();
 global.gpt = new GPT();
 await global.gpt.init();
 
-setting.init();
+await setting.init();
 
 global.userCache = new LURCache<string, User>({ max: emptyOr(parseInt(process.env.MAX_USER_CACHE), CONSTANT.MAX_USER_CACHE) });
 global.chattingUsers = new Set<string>();
@@ -55,9 +55,18 @@ fs.readdirSync('config/user').forEach(async file => {
 const dealMessage = async (
     message: string,
     userId: string,
+    originData?: any,
     allowCommand: boolean = true,
     allowChat: boolean = true,
 ) => {
+    if (setting.disableQQ.includes(originData.user_id.toString())) {
+        logger('master').debug(`用户${originData.user_id}是黑名单用户，拒绝回复`);
+        return null;
+    }
+    if (originData.group_id && setting.disableGroup.includes(originData.group_id.toString())) {
+        logger('master').debug(`群${originData.group_id}是黑名单群，拒绝回复`);
+        return null;
+    }
     try {
         if (message.startsWith(CONSTANT.COMMAND_PREFIX) && allowCommand) {
             const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
@@ -89,7 +98,7 @@ global.robot.on('private_message', async (data) => {
     const userId = data.user_id.toString();
     const replyCode = `[CQ:reply,id=${data.message_id}]`
     const allowChat = setting.autoPrivate || global.chattingUsers.has(userId);
-    const res = await dealMessage(data.message, userId, true, allowChat);
+    const res = await dealMessage(data.message, userId, data, true, allowChat);
     if (res !== null) {
         global.robot.sendPrivate(replyCode + res, data.user_id);
     }
@@ -110,8 +119,8 @@ global.robot.on('group_message', async (data) => {
     const allowChat = (setting.atMode !== AtMode.message || withAtCode) && (setting.autoGroup || global.chattingUsers.has(userId));
     // 删除所有atCode
     const message = data.message.replaceAll(atCode+' ', '').replaceAll(atCode, '');
-    const res = await dealMessage(message, userId, allowCommand, allowChat);
-    if(res!==null) {
+    const res = await dealMessage(message, userId, data, allowCommand, allowChat);
+    if(res!==null && res!==undefined) {
         global.robot.sendGroup(replyCode + res, data.group_id);
     }
 });

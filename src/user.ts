@@ -82,6 +82,10 @@ export class User {
         // 深拷贝一份
         this.currentConversation = JSON.parse(JSON.stringify(conversation));
         this.busy = false;
+        await this.save();
+    }
+
+    private async save() {
         await this.db.set('currentConversation', this.currentConversation);
     }
 
@@ -229,14 +233,14 @@ export class User {
                     tip = '(对话已达到最大长度，将删除最早的一条对话)\n';
                     conversation.data.shift();
                 }
-                await this.setConversation(conversation);
+                await this.save();
                 break;
             case ChatMode.pop_back:
                 if (res.usage.prompt_tokens >= setting.maxPrompts) {
                     tip = '(对话已达到最大长度，此次问答将不会被记录)\n';
                     conversation.data.pop();
                 } else {
-                    await this.setConversation(conversation);
+                    await this.save();
                 }
                 break;
             case ChatMode.not_save:

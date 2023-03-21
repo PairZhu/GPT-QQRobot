@@ -38,12 +38,12 @@ export class GPT {
             apiKey: this.apiKeys[this.apiKeyIndex],
             basePath: process.env.API_BASE_PATH,
         }));
-        this.axiosConfig = process.env.PROXY ? {
+        this.axiosConfig = {
             proxy: false,
-            httpAgent: HttpsProxyAgent(process.env.PROXY),
-            httpsAgent: HttpsProxyAgent(process.env.PROXY),
+            httpAgent: process.env.PROXY?HttpsProxyAgent(process.env.PROXY):undefined,
+            httpsAgent: process.env.PROXY?HttpsProxyAgent(process.env.PROXY):undefined,
             timeout: process.env.TIMEOUT || CONSTANT.TIMEOUT,
-        } : undefined;
+        };
         return true;
     }
 

@@ -29,6 +29,7 @@ services:
             - './logs:/GPT/logs'
         environment:
             - WS_URL=ws://改成你配置的URL
+            - MASTER_QQ=你的QQ号
 # 如果你在国内需要用代理，请取消下面一行的注释并修改为你的代理地址
 #            - PROXY=http://代理地址:端口
 # 如果你在国内，并且不方便使用代理，可以使用第三方的接口（本人不对第三方API的安全性负责）

@@ -12,6 +12,8 @@ import fs from 'fs';
 
 dotenv.config();
 
+global.masterQQ = process.env.MASTER_QQ;
+
 global.db = new DB('db.json');
 await global.db.init();
 
@@ -60,17 +62,17 @@ const dealMessage = async (
     allowChat: boolean = true,
 ) => {
     if (setting.disableQQ.includes(originData.user_id.toString())) {
-        logger('master').debug(`用户${originData.user_id}是黑名单用户，拒绝回复`);
+        logger('master').debug(`用户${originData.user_id}是黑名单用户，拒绝响应`);
         return null;
     }
     if (originData.group_id && setting.disableGroup.includes(originData.group_id.toString())) {
-        logger('master').debug(`群${originData.group_id}是黑名单群，拒绝回复`);
+        logger('master').debug(`群${originData.group_id}是黑名单群，拒绝响应`);
         return null;
     }
     try {
         if (message.startsWith(CONSTANT.COMMAND_PREFIX) && allowCommand) {
             const commandStr = message.slice(CONSTANT.COMMAND_PREFIX.length);
-            const res = await dealCommand(userId, commandStr);
+            const res = await dealCommand(userId, commandStr, originData);
             return res;
         }
         if (allowChat) {
@@ -126,3 +128,6 @@ global.robot.on('group_message', async (data) => {
 });
 
 logger('master').info('GPT-QQRobot启动成功！');
+
+// 通知管理员机器人已启动
+global.robot.sendPrivate('GPT-QQRobot启动成功！', global.masterQQ);

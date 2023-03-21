@@ -77,10 +77,6 @@ export const setting = {
                 await global.db.set(key, value);
                 break;
             case 'imageSize':
-                if (!(value in validImageSize)) {
-                    logger('master').error(`非法的图片尺寸: ${value}`);
-                    break;
-                }
                 this.imageSize = value;
                 await global.db.set(key, value);
                 break;

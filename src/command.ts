@@ -1,7 +1,13 @@
 import { CONSTANT } from "./utils/constant.js";
 import { User, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
-import { ChatMode, setting } from "./setting.js";
+import { 
+    ChatMode, 
+    setting, 
+    validImageSize, 
+    GroupMode, 
+    AtMode 
+} from "./setting.js";
 import { imageChatConversation } from "./image-chat.js";
 export interface Command {
     name: string;
@@ -9,6 +15,7 @@ export interface Command {
     deal: (userId: string, originStr: string, ...args: Array<string>) => Promise<string>;
     argNums?: Set<number>;
     help?: string;
+    adminOnly?: boolean;
 }
 
 async function preparedUser(userId: string): Promise<User> {
@@ -39,12 +46,12 @@ export const commandList: Array<Command> = [
                 }
             }
             const result = commandList.reduce((acc, cur) => {
-                return `${acc}\n${cur.name}: ${cur.description}`;
+                return `${acc}\n${cur.adminOnly?'*':''}${cur.name}: ${cur.description}`;
             }, `命令前缀: "${CONSTANT.COMMAND_PREFIX}"\n\n命令列表`) + '\n\n注: ' + this.help;
             return result;
         },
         argNums: new Set([0, 1]),
-        help: `help [命令名(可选)]: 指定命令名可显示具体命令的帮助信息，例如: ${CONSTANT.COMMAND_PREFIX}help list\n不指定则显示命令列表`
+        help: `help [命令名(可选)]: 指定命令名可显示具体命令的帮助信息，例如: ${CONSTANT.COMMAND_PREFIX}help list\n不指定则显示命令列表\n命令前带*号的为管理员命令（使用命令时不要加*号）\n命令必须加前缀才会响应`,
     },
     {
         name: 'begin',
@@ -364,15 +371,135 @@ export const commandList: Array<Command> = [
         },
         argNums: new Set([0]),
         help: `imgchat: 开启图片对话，开启后机器人将可以在聊天的时候发送图片，但不能读取图片`
+    },
+    {
+        name: 'set',
+        description: '设置机器人参数',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const paramName = args[0];
+            const paramValue = args[1];
+            switch(paramName) {
+                case 'maxImages':
+                    const maxImages = parseInt(paramValue);
+                    if(isNaN(maxImages)) {
+                        return '参数错误，maxImages必须是数字';
+                    }
+                    if(maxImages < 0) {
+                        return '参数错误，maxImages必须大于等于0';
+                    }
+                    await setting.set('maxImages',maxImages);
+                    return `maxImages已设置为${maxImages}`;
+                case 'imageSize':
+                    const imageSize = parseInt(paramValue);
+                    if (!(imageSize in validImageSize)) {
+                        return `参数错误，imageSize必须是${Object.keys(validImageSize).join('、')}中的一个`;
+                    }
+                    await setting.set('imageSize',imageSize);
+                    return `imageSize已设置为${imageSize}`;
+                case 'defaultChatMode':
+                    if (!ChatMode[paramName]) {
+                        return `参数错误，defaultChatMode必须是${Object.keys(ChatMode).join('、')}中的一个`;
+                    }
+                    await setting.set('defaultChatMode',paramValue);
+                    return `defaultChatMode已设置为${paramValue}`;
+                case 'groupMode':
+                    if (!GroupMode[paramName]) {
+                        return `参数错误，groupMode必须是${Object.keys(GroupMode).join('、')}中的一个`;
+                    }
+                    await setting.set('groupMode',paramValue);
+                    return `groupMode已设置为${paramValue}`;
+                case 'atMode':
+                    if (!AtMode[paramName]) {
+                        return `参数错误，atMode必须是${Object.keys(AtMode).join('、')}中的一个`;
+                    }
+                    await setting.set('atMode',paramValue);
+                    return `atMode已设置为${paramValue}`;
+                case 'maxTokens':
+                case 'maxPrompts':
+                    if (isNaN(parseInt(paramValue))) {
+                        return `参数错误，${paramName}必须是数字`;
+                    }
+                    if (parseInt(paramValue) <= 0) {
+                        return `参数错误，${paramName}必须大于0`;
+                    }
+                    await setting.set(paramName,parseInt(paramValue));
+                    return `${paramName}已设置为${paramValue}`;
+                default:
+                    return `参数错误，不存在${paramName}参数`;
+            }
+        },
+        argNums: new Set([2]),
+        help: `set [参数名] [参数值]: 设置机器人参数，例如: ${CONSTANT.COMMAND_PREFIX}set maxImages 10\n可设置的参数名: maxImages, imageSize, defaultChatMode, groupMode, atMode, maxTokens, maxPrompts`,
+        adminOnly: true
+    },
+    {
+        name: 'ban',
+        description: '将用户/群加入黑名单',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const targetId = args[0];
+            if(targetId.startsWith('g')) {
+                const groupId = targetId.slice(1);
+                if(setting.disableGroup.includes(groupId)) {
+                    return `群${groupId}已在黑名单中`;
+                } else {
+                    setting.disableGroup.push(groupId);
+                    await setting.set('disableGroup',setting.disableGroup);
+                    return `群${groupId}已加入黑名单`;
+                }
+            } else {
+                if(setting.disableQQ.includes(targetId)) {
+                    return `QQ${targetId}已在黑名单中`;
+                } else {
+                    setting.disableQQ.push(targetId);
+                    await setting.set('disableQQ',setting.disableQQ);
+                    return `QQ${targetId}已加入黑名单`;
+                }
+            }
+        },
+        argNums: new Set([1]),
+        help: `ban [QQ号/群号]: 将用户/群加入黑名单（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}ban g123456789`,
+        adminOnly: true
+    },
+    {
+        name: 'unban',
+        description: '将用户/群从黑名单中移除',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const targetId = args[0];
+            if(targetId.startsWith('g')) {
+                const groupId = targetId.slice(1);
+                if(setting.disableGroup.includes(groupId)) {
+                    setting.disableGroup.splice(setting.disableGroup.indexOf(groupId),1);
+                    await setting.set('disableGroup',setting.disableGroup);
+                    return `群${groupId}已从黑名单中移除`;
+                } else {
+                    return `群${groupId}不在黑名单中`;
+                }
+            } else {
+                if(setting.disableQQ.includes(targetId)) {
+                    setting.disableQQ.splice(setting.disableQQ.indexOf(targetId),1);
+                    await setting.set('disableQQ',setting.disableQQ);
+                    return `QQ${targetId}已从黑名单中移除`;
+                } else {
+                    return `QQ${targetId}不在黑名单中`;
+                }
+            }
+        },
+        argNums: new Set([1]),
+        help: `unban [QQ号/群号]: 将用户/群从黑名单中移除（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}unban g123456789`,
+        adminOnly: true
     }
 ];
 
-export async function dealCommand(userId: string, commandStr: string): Promise<string> {
+export async function dealCommand(userId: string, commandStr: string, originData: any): Promise<string> {
     // 把多个空格替换成一个空格，并去除前后空格，然后按空格分割
     logger('command').debug(`正在处理[${userId}]的命令: ${commandStr}`);
     const args = commandStr.replace(/\s+/g, ' ').trim().split(' ');
     const command = commandList.find(command => command.name === args[0]);
     if (command) {
+        if (command.adminOnly && originData.user_id.toString() !== global.masterQQ) {
+            logger('command').debug(`命令${command.name}无权限`);
+            return `命令${command.name}只有机器人管理员才能使用`;
+        }
         if (command.argNums && !command.argNums.has(args.length - 1)) {
             logger('command').debug(`命令${command.name}参数数量错误`);
             return `命令${command.name}参数数量错误，可接受的参数数量为${Array.from(command.argNums).join('、')}，您输入的参数为${args.length - 1}\n请输入${CONSTANT.COMMAND_PREFIX}help ${command.name}查看帮助信息`;

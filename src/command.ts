@@ -397,19 +397,19 @@ export const commandList: Array<Command> = [
                     await setting.set('imageSize',imageSize);
                     return `imageSize已设置为${imageSize}`;
                 case 'defaultChatMode':
-                    if (!ChatMode[paramName]) {
+                    if (!ChatMode[paramValue]) {
                         return `参数错误，defaultChatMode必须是${Object.keys(ChatMode).join('、')}中的一个`;
                     }
                     await setting.set('defaultChatMode',paramValue);
                     return `defaultChatMode已设置为${paramValue}`;
                 case 'groupMode':
-                    if (!GroupMode[paramName]) {
+                    if (!GroupMode[paramValue]) {
                         return `参数错误，groupMode必须是${Object.keys(GroupMode).join('、')}中的一个`;
                     }
                     await setting.set('groupMode',paramValue);
                     return `groupMode已设置为${paramValue}`;
                 case 'atMode':
-                    if (!AtMode[paramName]) {
+                    if (!AtMode[paramValue]) {
                         return `参数错误，atMode必须是${Object.keys(AtMode).join('、')}中的一个`;
                     }
                     await setting.set('atMode',paramValue);

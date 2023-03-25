@@ -502,7 +502,7 @@ export async function dealCommand(userId: string, commandStr: string, originData
         }
         if (command.argNums && !command.argNums.has(args.length - 1)) {
             logger('command').debug(`命令${command.name}参数数量错误`);
-            return `命令${command.name}参数数量错误，可接受的参数数量为${Array.from(command.argNums).join('、')}，您输入的参数为${args.length - 1}\n请输入${CONSTANT.COMMAND_PREFIX}help ${command.name}查看帮助信息`;
+            return `命令${command.name}参数数量错误，可接受的参数数量为${Array.from(command.argNums).join('、')}，您输入的参数数量为${args.length - 1}\n请输入${CONSTANT.COMMAND_PREFIX}help ${command.name}查看帮助信息`;
         }
         logger('command').debug(`匹配到命令${command.name}，正在执行`);
         const res = await command.deal(userId, commandStr, ...args.slice(1));

@@ -130,4 +130,6 @@ global.robot.on('group_message', async (data) => {
 logger('master').info('GPT-QQRobot启动成功！');
 
 // 通知管理员机器人已启动
-global.robot.sendPrivate('GPT-QQRobot启动成功！', global.masterQQ);
+if(process.env.NOTIFY_MASTER) {
+    global.robot.sendPrivate('GPT-QQRobot启动成功！', global.masterQQ);
+}

@@ -73,7 +73,7 @@ export class Robot {
         if (accessToken) {
             this.wsOptions = {
                 headers: {
-                    'Authorization': 'Bearer ' + accessToken
+                    Authorization: 'Bearer ' + accessToken
                 }
             }
         }
@@ -203,6 +203,8 @@ export class Robot {
                     message: split,
                 },
             });
+            // 等待2秒，确保消息有序到达
+            await sleep(2 * 1000);
         }
     }
 
@@ -216,6 +218,8 @@ export class Robot {
                     message: split,
                 },
             });
+            // 等待2秒，确保消息有序到达
+            await sleep(2 * 1000);
         }
     }
 }

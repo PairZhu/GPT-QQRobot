@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "nest build",
+    "prod": "nest build -p tsconfig.prod.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -10,7 +11,7 @@
     "start:prod": "node dist/main"
   },
   "dependencies": {
-    "@nestjs/cli": "^9.2.0",
+    "@nestjs/cli": "^9.3.0",
     "dotenv": "^16.0.3",
     "https-proxy-agent": "^5.0.1",
     "log4js": "^6.7.1",

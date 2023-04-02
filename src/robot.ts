@@ -9,6 +9,7 @@ export class Robot {
     private static splitCharList = ['\n',', ','，','. ','。','! ','！','? ','？',' ','\t'];
     private static webSocketTimeout = 30 * 1000;
     private ws: ws;
+    private wsOptions: any;
     private wsUrl: string;
     private privateListeners: Map<Function, Function> = new Map();
     private groupListeners: Map<Function, Function> = new Map();
@@ -33,7 +34,7 @@ export class Robot {
         return result
     }
 
-    private static async connectedClient(url: string): Promise<boolean> {
+    private static async connectedClient(url: string,wsOptions: any): Promise<boolean> {
         const wsResult = client => new Promise((resolve) => {
             const onSuccess = () => {
                 client.off('open', onSuccess);
@@ -49,7 +50,7 @@ export class Robot {
             client.on('open', onSuccess);
         })
         while (true) {
-            const client = new ws(url);
+            const client = new ws(url, wsOptions);
             const state = await wsResult(client);
             if (state) {
                 return client;
@@ -67,8 +68,15 @@ export class Robot {
         return str.replaceAll(reg, (_, val) => String.fromCharCode(val)).replaceAll('&amp;', '&');
     }
 
-    constructor(wsUrl?: string) {
+    constructor(wsUrl: string, accessToken?: string) {
         this.wsUrl = wsUrl;
+        if (accessToken) {
+            this.wsOptions = {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            }
+        }
     }
 
     on(event: string, callback:Function) {
@@ -132,7 +140,7 @@ export class Robot {
 
     async init(): Promise<boolean> {
         logger('robot').info("开始连接CQHTTP...");
-        this.ws = await Robot.connectedClient(this.wsUrl);
+        this.ws = await Robot.connectedClient(this.wsUrl, this.wsOptions);
         logger('robot').info("CQHTTP连接成功！");
         this.ws.on('close', () => {
             logger('robot').error("CQHTTP连接已断开！");

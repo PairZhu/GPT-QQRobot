@@ -21,10 +21,12 @@
 ## 3. 配置项
 __带"*"加粗的参数为必须配置的参数__
 - __* websocket连接地址__:
-    > 末尾不要加斜杆
     - 环境变量: `WS_URL`
 - __* OpenAI API Key__:
     - 配置文件(`api_keys.txt`): 一行一个API Key 
+- CQ-HTTP access-token:
+    > 如果你的go-cqhttp配置了access-token，那么请在这里配置
+    - 环境变量: `ACCESS_TOKEN`
 - OpenAI API基地址:
     > 如果服务器在国内且不方便使用代理，请配置此项，使用第三方的API（本人不对第三方API的安全性负责）  
     > 查看目前已收集的第三方api地址 [查看](./api.md)

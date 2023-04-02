@@ -17,7 +17,7 @@ global.masterQQ = process.env.MASTER_QQ;
 global.db = new DB('db.json');
 await global.db.init();
 
-global.robot = new Robot(process.env.WS_URL);
+global.robot = new Robot(process.env.WS_URL, process.env.ACCESS_TOKEN);
 await global.robot.init();
 
 global.gpt = new GPT();

@@ -166,9 +166,22 @@ export const commandList: Array<Command> = [
             const user = await preparedUser(userId);
             const conversation = user.getConversation();
             const info = user.getInfo();
-            let res = `用户信息\n对话模式: ${info.mode}\n对话人设: ${info.prefix}\ntemperature: ${info.temperature}\ntop_p: ${info.top_p}\nfrequency_penalty: ${info.frequency_penalty}\npresence_penalty: ${info.presence_penalty}\n\n当前对话\n`;
+            let res = `用户信息
+可用模型: ${info.accessModels.join(', ')}
+对话模型: ${info.model}
+对话模式: ${info.mode}
+对话人设: ${info.prefix}
+temperature: ${info.temperature}
+top_p: ${info.top_p}
+frequency_penalty: ${info.frequency_penalty}
+presence_penalty: ${info.presence_penalty}
+\n当前对话\n`;
             if (conversation) {
-                res += `对话人设: ${conversation.prefix}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}`;
+                res += `对话人设: ${conversation.prefix}
+temperature: ${conversation.temperature}
+top_p: ${conversation.top_p}
+frequency_penalty: ${conversation.frequency_penalty}
+presence_penalty: ${conversation.presence_penalty}`;
             } else {
                 res += '无';
             }
@@ -288,6 +301,8 @@ export const commandList: Array<Command> = [
             if (isNaN(paramValue)) {
                 return `参数${paramName}的值必须是数字`;
             }
+            params[paramName] = paramValue;
+            await user.setParams(params);
             return `参数${paramName}已设置为${paramValue}`;
         },
         argNums: new Set([2]),
@@ -372,6 +387,21 @@ export const commandList: Array<Command> = [
         argNums: new Set([0]),
         help: `imgchat: 开启图片对话，开启后机器人将可以在聊天的时候发送图片，但不能读取图片`
     },
+    {
+        name: 'model',
+        description: '设置对话模型',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const model = args[0];
+            const user = await preparedUser(userId);
+            if (await user.setModel(model)) {
+                return `对话模型已设置为${model}，立即生效`;
+            }
+            return `无权使用模型“${model}”或模型不存在，请联系管理员确认`;
+        },
+        argNums: new Set([1]),
+        help: `model [模型名]: 设置对话模型，例如: ${CONSTANT.COMMAND_PREFIX}model gpt-4`
+    },
+    // 以下为管理员命令
     {
         name: 'set',
         description: '设置机器人参数',
@@ -487,6 +517,34 @@ export const commandList: Array<Command> = [
         argNums: new Set([1]),
         help: `unban [QQ号/群号]: 将用户/群从黑名单中移除（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}unban g123456789`,
         adminOnly: true
+    },
+    {
+        name: 'enable',
+        description: '为用户添加可用的模型',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const model = args[0];
+            const targetId = args[1];
+            const targetUser = await preparedUser(targetId);
+            targetUser.enableModel(model);
+            return `已为用户${targetId}添加模型${model}`;
+        },
+        argNums: new Set([2]),
+        help: `enable [模型名] [QQ号]: 为用户添加可用的模型，如果是派对模式的群聊，用“g[群号]”代替QQ号，例如: ${CONSTANT.COMMAND_PREFIX}enable gpt-4 g123456789`,
+        adminOnly: true,
+    },
+    {
+        name: 'disable',
+        description: '给用户移除可用的模型',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const model = args[0];
+            const targetId = args[1];
+            const targetUser = await preparedUser(targetId);
+            targetUser.disableModel(model);
+            return `已为用户${targetId}移除模型${model}`;
+        },
+        argNums: new Set([2]),
+        help: `disable [模型名] [QQ号]: 给用户移除可用的模型，如果是派对模式的群聊，用“g[群号]”代替QQ号，例如: ${CONSTANT.COMMAND_PREFIX}disable gpt-4 g123456789`,
+        adminOnly: true,
     }
 ];
 

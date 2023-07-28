@@ -30,6 +30,8 @@ export class User {
     private presence_penalty: number;
     private gpt: GPT;
     private mode: ChatMode;
+    private model: string;
+    private accessModels: Array<string>;
     public busy: boolean = false;
 
     constructor(id: string, gpt: GPT) {
@@ -43,29 +45,50 @@ export class User {
             fs.mkdirSync('config/user');
         }
         await this.db.init();
-        this.prefix = this.db.get('prefix');
-        this.temperature = this.db.get('temperature');
-        this.top_p = this.db.get('top_p');
-        this.frequency_penalty = this.db.get('frequency_penalty');
-        this.presence_penalty = this.db.get('presence_penalty');
-        this.mode = ChatMode[this.db.get('mode')];
+        this.prefix = emptyOr(this.db.get('prefix'), setting.defaultPrefix);
+        this.temperature = emptyOr(this.db.get('temperature'), setting.defaultTemperature);
+        this.top_p = emptyOr(this.db.get('top_p'), setting.defaultTop_p);
+        this.frequency_penalty = emptyOr(this.db.get('frequency_penalty'), setting.defaultFrequency_penalty);
+        this.presence_penalty = emptyOr(this.db.get('presence_penalty'), setting.defaultPresence_penalty);
+        this.mode = emptyOr(ChatMode[this.db.get('mode')], setting.defaultMode);
         this.conversations = this.db.get('conversations') || [];
         this.currentConversation = this.db.get('currentConversation', undefined);
         this.images = this.db.get('images') || [];
         this.uuid = this.db.get('uuid') || uuidv5(this.id, uuidv5.URL);
+        this.model = emptyOr(this.db.get('model'), setting.defaultModel);
+        this.accessModels = this.db.get('access_models') || [setting.defaultModel];
         if (!this.db.get('uuid')) {
-            await this.db.set('uuid', this.uuid);
+            await this.write();
         }
+    }
+
+    async write() {
+        const dbData = this.db.origin();
+        dbData['prefix'] = this.prefix;
+        dbData['temperature'] = this.temperature;
+        dbData['top_p'] = this.top_p;
+        dbData['frequency_penalty'] = this.frequency_penalty;
+        dbData['presence_penalty'] = this.presence_penalty;
+        dbData['mode'] = Object.keys(ChatMode).find(key => ChatMode[key] === this.mode);
+        dbData['conversations'] = this.conversations;
+        dbData['currentConversation'] = this.currentConversation;
+        dbData['images'] = this.images;
+        dbData['uuid'] = this.uuid;
+        dbData['model'] = this.model;
+        dbData['access_models'] = this.accessModels;
+        await this.db.save();
     }
 
     getInfo() {
         return ({
-            prefix: emptyOr(this.prefix, setting.defaultPrefix),
-            temperature: emptyOr(this.temperature, setting.defaultTemperature),
-            top_p: emptyOr(this.top_p, setting.defaultTop_p),
-            frequency_penalty: emptyOr(this.frequency_penalty, setting.defaultFrequency_penalty),
-            presence_penalty: emptyOr(this.presence_penalty, setting.defaultPresence_penalty),
-            mode: Object.keys(ChatMode).find(key => ChatMode[key] === emptyOr(this.mode, setting.defaultMode)),
+            prefix: this.prefix,
+            temperature: this.temperature,
+            top_p: this.top_p,
+            frequency_penalty: this.frequency_penalty,
+            presence_penalty: this.presence_penalty,
+            accessModels: this.accessModels,
+            model: this.model,
+            mode: Object.keys(ChatMode).find(key => ChatMode[key] === this.mode),
         });
     }
 
@@ -104,24 +127,20 @@ export class User {
 
     async resetParams() {
         await this.setParams({
-            temperature: undefined,
-            top_p: undefined,
-            frequency_penalty: undefined,
-            presence_penalty: undefined,
+            temperature: setting.defaultTemperature,
+            top_p: setting.defaultTop_p,
+            frequency_penalty: setting.defaultFrequency_penalty,
+            presence_penalty: setting.defaultPresence_penalty,
         });
-        await this.setMode(undefined);
-        await this.setPrefix(undefined);
+        await this.setModel(setting.defaultModel);
+        await this.setMode(setting.defaultMode);
+        await this.setPrefix(setting.defaultPrefix);
     }
 
     async setMode(mode: string): Promise<boolean> {
         if (ChatMode[mode]) {
             this.mode = ChatMode[mode];
             await this.db.set('mode', mode);
-            return true;
-        }
-        if (mode === undefined || mode === null) {
-            this.mode = undefined;
-            await this.db.set('mode', undefined);
             return true;
         }
         return false;
@@ -159,11 +178,11 @@ export class User {
 
     async beginConversation() {
         this.currentConversation = {
-            prefix: emptyOr(this.prefix, setting.defaultPrefix),
-            temperature: emptyOr(this.temperature, setting.defaultTemperature),
-            top_p: emptyOr(this.top_p, setting.defaultTop_p),
-            frequency_penalty: emptyOr(this.frequency_penalty, setting.defaultFrequency_penalty),
-            presence_penalty: emptyOr(this.presence_penalty, setting.defaultPresence_penalty),
+            prefix: this.prefix,
+            temperature: this.temperature,
+            top_p: this.top_p,
+            frequency_penalty: this.frequency_penalty,
+            presence_penalty: this.presence_penalty,
             data: [],
             title: undefined,
         };
@@ -207,12 +226,13 @@ export class User {
             frequency_penalty: conversation.frequency_penalty,
             presence_penalty: conversation.presence_penalty,
             user: this.uuid,
+            model: this.model,
         });
         if (!res) {
             this.busy = false;
             return '出错了，请稍后再试，或联系管理员';
         }
-        logger('user').debug(`[${this.id}]的回答结果:\n${res.text}`);
+        logger('user').debug(`[${this.id}](${this.model})的回答结果:\n${res.text}`);
         logger('usage').info(`[${this.id}]消耗tokens:{total:${res.usage.total_tokens},prompt:${res.usage.prompt_tokens},completion:${res.usage.completion_tokens}}`);
         // 如果conversation已经被切换，说明用户已经开始了新的对话，那么就不保存这次的对话
         if (conversation !== this.currentConversation) {
@@ -227,7 +247,7 @@ export class User {
             res.text = await imageConvert(res.text,this);
         }
         let tip = '';
-        switch (emptyOr(this.mode, setting.defaultMode)) {
+        switch (this.mode) {
             case ChatMode.pop_front:
                 if (res.usage.prompt_tokens >= setting.maxPrompts) {
                     tip = '(对话已达到最大长度，将删除最早的一条对话)\n';
@@ -258,5 +278,25 @@ export class User {
     async endConversation() {
         this.currentConversation = undefined;
         await this.db.set('currentConversation', this.currentConversation);
+    }
+
+    async enableModel(model: string) {
+        this.accessModels.push(model);
+        this.accessModels = Array.from(new Set(this.accessModels));
+        await this.db.set('access_models', this.accessModels);
+    }
+
+    async disableModel(model: string) {
+        this.accessModels = this.accessModels.filter(m => m !== model);
+        await this.db.set('access_models', this.accessModels);
+    }
+
+    async setModel(model: string):Promise<boolean> {
+        if (this.accessModels.includes(model)) {
+            this.model = model;
+            await this.db.set('model', model);
+            return true;
+        }
+        return false;
     }
 }

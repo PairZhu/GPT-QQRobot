@@ -46,6 +46,7 @@ export const setting = {
     maxImages: undefined,
     disableGroup: undefined,
     disableQQ: undefined,
+    defaultModel: undefined,
 
     async init() {
         this.maxTokens = emptyOr(global.db.get('maxTokens'), parseInt(process.env.MAX_TOKENS), CONSTANT.MAX_TOKENS);
@@ -68,6 +69,7 @@ export const setting = {
         }
         this.disableGroup = await readLineFile('disable_group.txt');
         this.disableQQ = await readLineFile('disable_qq.txt');
+        this.defaultModel = emptyOr(global.db.get('defaultModel'), process.env.DEFAULT_MODEL, CONSTANT.DEFAULT_MODEL);
     },
 
     async set(key: string, value: any) {

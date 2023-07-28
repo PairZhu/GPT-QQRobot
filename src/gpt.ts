@@ -75,7 +75,6 @@ export class GPT {
     async chatCompletion(params) {
         return await this.tryAllKeys(async () => {
             const { data } = await this.openai.createChatCompletion({
-                model: "gpt-3.5-turbo",
                 max_tokens: setting.maxTokens,
                 ...params,
             }, this.axiosConfig);

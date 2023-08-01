@@ -87,6 +87,13 @@ export const setting = {
                 this.disableQQ = value;
                 await writeLineFile('disable_qq.txt', value);
                 break;
+            case 'enableGroup':
+                this.enableGroup = value;
+                await writeLineFile('enable_group.txt', value);
+                break;
+            case 'enableQQ':
+                this.enableQQ = value;
+                await writeLineFile('enable_qq.txt', value);
             default:
                 this[key] = value;
                 await global.db.set(key, value);

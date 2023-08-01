@@ -589,6 +589,7 @@ not_save: 之后的对话不保存对话的上下文
         },
         argNums: new Set([1]),
         help: `allow [QQ号/群号]: 将用户/群加入白名单（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}allow g123456789`,
+        adminOnly: true,
     },
     {
         name: 'disallow',
@@ -622,6 +623,7 @@ not_save: 之后的对话不保存对话的上下文
         },
         argNums: new Set([1]),
         help: `disallow [QQ号/群号]: 将用户/群从白名单中移除（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}disallow g123456789`,
+        adminOnly: true,
     },
     {
         name: 'enable',

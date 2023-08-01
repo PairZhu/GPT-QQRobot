@@ -61,8 +61,14 @@ const dealMessage = async (
     allowCommand: boolean = true,
     allowChat: boolean = true,
 ) => {
+    if (setting.enableQQ.length && !setting.enableQQ.includes(userId)) {
+        return null;
+    }
     if (setting.disableQQ.includes(originData.user_id.toString())) {
         logger('master').debug(`用户${originData.user_id}是黑名单用户，拒绝响应`);
+        return null;
+    }
+    if (originData.group_id && setting.enableGroup.length && !setting.enableGroup.includes(originData.group_id.toString())) {
         return null;
     }
     if (originData.group_id && setting.disableGroup.includes(originData.group_id.toString())) {

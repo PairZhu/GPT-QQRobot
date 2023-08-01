@@ -35,6 +35,7 @@ _✨ 基于openai官方API和go-cqhttp的聊天机器人✨_
 - [2023/3/10 19:00] 修改配置名称 DEFAULT_MAX_TOKENS为MAX_TOKENS，DEFAULT_MAX_PROMPTS为MAX_PROMPTS，DEFAULT_MAX_USER_CACHE改为MAX_USER_CACHE，增加AI图片功能
 - [2023/3/10 22:40] 增加图片聊天功能，可以在聊天的同时使用AI图片生成器生成图片（chatGPT自动生成的prompt）
 - [2023/7/29 1:10] 修复param命令的bug，增加实时切换对话模型的功能，支持gpt-4，优化了代码结构，旧版本用户的数据如果没有删除可能会导致命令结果显示错误（部分参数显示undefined），但不影响使用，如果想要修复这个问题，可以删除该用户的数据文件，但是会导致该用户的数据丢失
+- [2023/8/2 0:10] 修复可能的显示错误的bug，不用删除用户数据文件。新增白名单功能和push命令
 ## 🚀使用教程
 ### 1. 注册
 注册OpenAI账号，获取API Key [具体教程](./docs/register.md)。

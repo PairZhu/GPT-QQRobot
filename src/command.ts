@@ -558,6 +558,72 @@ not_save: 之后的对话不保存对话的上下文
         adminOnly: true
     },
     {
+        name: 'allow',
+        description: '将用户/群加入白名单',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const targetId = args[0];
+            if(targetId.startsWith('g')) {
+                const groupId = targetId.slice(1);
+                if(setting.enableGroup.includes(groupId)) {
+                    return `群${groupId}已在白名单中`;
+                } else {
+                    setting.enableGroup.push(groupId);
+                    await setting.set('enableGroup',setting.enableGroup);
+                    if(setting.enableGroup.length === 1) {
+                        return `群${groupId}已加入白名单，群白名单已启用`;
+                    }
+                    return `群${groupId}已加入白名单`;
+                }
+            } else {
+                if(setting.enableQQ.includes(targetId)) {
+                    return `QQ${targetId}已在白名单中`;
+                } else {
+                    setting.enableQQ.push(targetId);
+                    await setting.set('enableQQ',setting.enableQQ);
+                    if(setting.enableQQ.length === 1) {
+                        return `QQ${targetId}已加入白名单，QQ白名单已启用`;
+                    }
+                    return `QQ${targetId}已加入白名单`;
+                }
+            }
+        },
+        argNums: new Set([1]),
+        help: `allow [QQ号/群号]: 将用户/群加入白名单（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}allow g123456789`,
+    },
+    {
+        name: 'disallow',
+        description: '将用户/群从白名单中移除',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            const targetId = args[0];
+            if(targetId.startsWith('g')) {
+                const groupId = targetId.slice(1);
+                if(setting.enableGroup.includes(groupId)) {
+                    setting.enableGroup.splice(setting.enableGroup.indexOf(groupId),1);
+                    await setting.set('enableGroup',setting.enableGroup);
+                    if(setting.enableGroup.length === 0) {
+                        return `群${groupId}已从白名单中移除，群白名单已禁用`;
+                    }
+                    return `群${groupId}已从白名单中移除，群白名单剩余${setting.enableGroup.length}个`;
+                } else {
+                    return `群${groupId}不在白名单中`;
+                }
+            } else {
+                if(setting.enableQQ.includes(targetId)) {
+                    setting.enableQQ.splice(setting.enableQQ.indexOf(targetId),1);
+                    await setting.set('enableQQ',setting.enableQQ);
+                    if(setting.enableQQ.length === 0) {
+                        return `QQ${targetId}已从白名单中移除，QQ白名单已禁用`;
+                    }
+                    return `QQ${targetId}已从白名单中移除，QQ白名单剩余${setting.enableQQ.length}个`;
+                } else {
+                    return `QQ${targetId}不在白名单中`;
+                }
+            }
+        },
+        argNums: new Set([1]),
+        help: `disallow [QQ号/群号]: 将用户/群从白名单中移除（如果是群号，群号前要加g），例如: ${CONSTANT.COMMAND_PREFIX}disallow g123456789`,
+    },
+    {
         name: 'enable',
         description: '为用户添加可用的模型',
         deal: async function (userId: string, originStr: string, ...args: Array<string>) {

@@ -1,12 +1,11 @@
-import { CONSTANT } from "./utils/constant.js";
+import { CONSTANT, IMAGE_SIZE_USAGE } from "./utils/constant.js";
 import { User, Conversation } from "./user.js";
 import { logger } from "./utils/utils.js";
 import { 
     ChatMode, 
     setting, 
-    validImageSize, 
     GroupMode, 
-    AtMode 
+    AtMode
 } from "./setting.js";
 import { imageChatConversation } from "./image-chat.js";
 export interface Command {
@@ -51,7 +50,10 @@ export const commandList: Array<Command> = [
             return result;
         },
         argNums: new Set([0, 1]),
-        help: `help [命令名(可选)]: 指定命令名可显示具体命令的帮助信息，例如: ${CONSTANT.COMMAND_PREFIX}help list\n不指定则显示命令列表\n命令前带*号的为管理员命令（使用命令时不要加*号）\n命令必须加前缀才会响应`,
+        help: `help [命令名(可选)]: 指定命令名可显示具体命令的帮助信息，例如: ${CONSTANT.COMMAND_PREFIX}help list
+不指定则显示命令列表
+命令前带*号的为管理员命令（使用命令时不要加*号）
+命令必须加前缀才会响应`,
     },
     {
         name: 'begin',
@@ -92,7 +94,8 @@ export const commandList: Array<Command> = [
             return '对话已存档';
         },
         argNums: new Set([1]),
-        help: `save [对话标题]: 存档当前对话，例如: ${CONSTANT.COMMAND_PREFIX}save 聊天1\n如果对话后续发生变化将不会同步到存档的对话中（可以理解为游戏的存档功能）`
+        help: `save [对话标题]: 存档当前对话，例如: ${CONSTANT.COMMAND_PREFIX}save 聊天1
+如果对话后续发生变化将不会同步到存档的对话中（可以理解为游戏的存档功能）`
     },
     {
         name: 'list',
@@ -111,7 +114,12 @@ export const commandList: Array<Command> = [
                 return `序号超出范围，输入${CONSTANT.COMMAND_PREFIX}list查看存档列表`;
             }
             const conversation = conversationList[index - 1];
-            return `标题: ${conversation.title}\ntemperature: ${conversation.temperature}\ntop_p: ${conversation.top_p}\nfrequency_penalty: ${conversation.frequency_penalty}\npresence_penalty: ${conversation.presence_penalty}\n\n`+ conversation2String(conversation);
+            return `标题: ${conversation.title}
+temperature: ${conversation.temperature}
+top_p: ${conversation.top_p}
+frequency_penalty: ${conversation.frequency_penalty}
+presence_penalty: ${conversation.presence_penalty}
+\n${conversation2String(conversation)}`;
         },
         argNums: new Set([0, 1]),
         help: `list [序号(可选)]: 指定序号可显示对应对话的内容，例如: ${CONSTANT.COMMAND_PREFIX}list 1\n不指定则显示存档列表`
@@ -137,7 +145,8 @@ export const commandList: Array<Command> = [
             return `已加载存档"${conversation.title}"，对话已开启`;
         },
         argNums: new Set([1]),
-        help: `load [序号]: 加载序号对应的对话存档，例如: ${CONSTANT.COMMAND_PREFIX}load 1\n加载后当前对话会丢失，并且载入对话不会覆盖原来的存档（可以理解为游戏的存档功能）`
+        help: `load [序号]: 加载序号对应的对话存档，例如: ${CONSTANT.COMMAND_PREFIX}load 1
+加载后当前对话会丢失，并且载入对话不会覆盖原来的存档（可以理解为游戏的存档功能）`
     },
     {
         name: 'delete',
@@ -240,7 +249,12 @@ presence_penalty: ${conversation.presence_penalty}`;
             return `未找到该对话模式"${mode}"，输入${CONSTANT.COMMAND_PREFIX}help mode查看帮助`;
         },
         argNums: new Set([1]),
-        help: `mode [模式]: 设置对话模式，例如：${CONSTANT.COMMAND_PREFIX}mode pop_back\n\n目前支持的模式有:\n${Object.keys(ChatMode).map(key => `${key}: ${ChatMode[key]}`).join('\n')}\n\n设置的模式对下次问答立即生效`
+        help: `mode [模式]: 设置对话模式，例如：${CONSTANT.COMMAND_PREFIX}mode pop_back
+\n目前支持的模式有:
+pop_back: 如果对话达到最大长度，将自动删除最新的一条对话记录
+pop_front: 如果对话达到最大长度，将自动删除最早的一条对话记录
+not_save: 之后的对话不保存对话的上下文
+\n设置的模式对下次问答立即生效`
     },
     {
         name: 'char',
@@ -249,7 +263,7 @@ presence_penalty: ${conversation.presence_penalty}`;
             // 删除最开始的空格
             let prefix = originStr.replace(/^\s+/, '').slice(this.name.length + 1);
             if (!prefix) {
-                return `缺少人设内容，请输入${CONSTANT.COMMAND_PREFIX}help char查看帮助信息`;
+                return `缺少人设内容，请输入${CONSTANT.COMMAND_PREFIX}help char查看帮助`;
             }
             const user = await preparedUser(userId);
             user.setPrefix(prefix);
@@ -266,7 +280,7 @@ presence_penalty: ${conversation.presence_penalty}`;
                 return '管理员未开启图片生成功能';
             }
             if (!prompt) {
-                return `缺少图片描述，请输入${CONSTANT.COMMAND_PREFIX}help img查看帮助信息`;
+                return `缺少图片描述，请输入${CONSTANT.COMMAND_PREFIX}help img查看帮助`;
             }
             const user = await preparedUser(userId);
             const res = await user.getImage(prompt);
@@ -306,7 +320,10 @@ presence_penalty: ${conversation.presence_penalty}`;
             return `参数${paramName}已设置为${paramValue}`;
         },
         argNums: new Set([2]),
-        help: `param [参数名] [参数值]: 设置对话参数，例如: ${CONSTANT.COMMAND_PREFIX}param temperature 0.8\n设置的参数将在新创建的对话中生效\n支持的参数名有:temperature、top_p、frequency_penalty、presence_penalty\n参数的具体含义请参考OpenAI官网的文档 https://platform.openai.com/docs/api-reference/chat/create`
+        help: `param [参数名] [参数值]: 设置对话参数，例如: ${CONSTANT.COMMAND_PREFIX}param temperature 0.8
+设置的参数将在新创建的对话中生效
+支持的参数名有:temperature、top_p、frequency_penalty、presence_penalty
+参数的具体含义请参考OpenAI官网的文档 https://platform.openai.com/docs/api-reference/chat/create`
     },
     {
         name: 'share',
@@ -401,6 +418,28 @@ presence_penalty: ${conversation.presence_penalty}`;
         argNums: new Set([1]),
         help: `model [模型名]: 设置对话模型，例如: ${CONSTANT.COMMAND_PREFIX}model gpt-4`
     },
+    {
+        name: 'push',
+        description: '添加对话记录',
+        deal: async function (userId: string, originStr: string, ...args: Array<string>) {
+            if (!global.chattingUsers.has(userId)) {
+                return '当前没有对话，请先开启对话';
+            }
+            const user = await preparedUser(userId);
+            const conversation = user.getConversation();
+            const jsonData = originStr.replace(/^\s+/, '').slice(this.name.length + 1);
+            let data:[string, string];
+            // 判断是否是合法的json
+            try {
+                data = JSON.parse(jsonData);
+            } catch (e) {
+                return '参数格式不合法，输入${CONSTANT.COMMAND_PREFIX}help push查看帮助';
+            }
+            conversation.data.push(data);
+            user.setConversation(conversation);
+        },
+        help: `push [对话记录]: 添加对话记录，例如: ${CONSTANT.COMMAND_PREFIX}push ["你好","你好，有什么可以帮助你？"]\n对话记录必须是一个合法的json数组，数组的长度必须为2，第一项是用户的提问，第二项是机器人的回答`
+    },
     // 以下为管理员命令
     {
         name: 'set',
@@ -421,8 +460,8 @@ presence_penalty: ${conversation.presence_penalty}`;
                     return `maxImages已设置为${maxImages}`;
                 case 'imageSize':
                     const imageSize = parseInt(paramValue);
-                    if (!(imageSize in validImageSize)) {
-                        return `参数错误，imageSize必须是${Object.keys(validImageSize).join('、')}中的一个`;
+                    if (!(imageSize in IMAGE_SIZE_USAGE)) {
+                        return `参数错误，imageSize必须是${Object.keys(IMAGE_SIZE_USAGE).join('、')}中的一个`;
                     }
                     await setting.set('imageSize',imageSize);
                     return `imageSize已设置为${imageSize}`;
@@ -560,7 +599,7 @@ export async function dealCommand(userId: string, commandStr: string, originData
         }
         if (command.argNums && !command.argNums.has(args.length - 1)) {
             logger('command').debug(`命令${command.name}参数数量错误`);
-            return `命令${command.name}参数数量错误，可接受的参数数量为${Array.from(command.argNums).join('、')}，您输入的参数数量为${args.length - 1}\n请输入${CONSTANT.COMMAND_PREFIX}help ${command.name}查看帮助信息`;
+            return `命令${command.name}参数数量错误，可接受的参数数量为${Array.from(command.argNums).join('、')}，您输入的参数数量为${args.length - 1}\n请输入${CONSTANT.COMMAND_PREFIX}help ${command.name}查看帮助`;
         }
         logger('command').debug(`匹配到命令${command.name}，正在执行`);
         const res = await command.deal(userId, commandStr, ...args.slice(1));

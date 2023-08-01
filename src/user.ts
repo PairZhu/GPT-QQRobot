@@ -69,7 +69,7 @@ export class User {
         dbData['top_p'] = this.top_p;
         dbData['frequency_penalty'] = this.frequency_penalty;
         dbData['presence_penalty'] = this.presence_penalty;
-        dbData['mode'] = Object.keys(ChatMode).find(key => ChatMode[key] === this.mode);
+        dbData['mode'] = this.mode;
         dbData['conversations'] = this.conversations;
         dbData['currentConversation'] = this.currentConversation;
         dbData['images'] = this.images;
@@ -88,7 +88,7 @@ export class User {
             presence_penalty: this.presence_penalty,
             accessModels: this.accessModels,
             model: this.model,
-            mode: Object.keys(ChatMode).find(key => ChatMode[key] === this.mode),
+            mode: this.mode,
         });
     }
 

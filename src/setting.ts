@@ -1,5 +1,5 @@
 import { emptyOr, logger, readLineFile, writeLineFile } from './utils/utils.js';
-import { CONSTANT } from './utils/constant.js';
+import { CONSTANT, IMAGE_SIZE_USAGE } from './utils/constant.js';
 
 export enum GroupMode {
     personal = 'personal', // 群内每个人的对话独立互不干扰
@@ -15,16 +15,9 @@ export enum AtMode {
 }
 
 export enum ChatMode {
-    pop_back = '如果对话达到最大长度，将自动删除最新的一条对话记录',
-    pop_front = '如果对话达到最大长度，将自动删除最早的一条对话记录',
-    not_save = '之后的对话不保存对话的上下文',
-};
-
-export const validImageSize = {
-    0: 0,
-    256: 0.016,
-    512: 0.018,
-    1024: 0.020,
+    pop_back = 'pop_back', //如果对话达到最大长度，将自动删除最新的一条对话记录
+    pop_front = 'pop_front', //如果对话达到最大长度，将自动删除最早的一条对话记录
+    not_save = 'not_save', //之后的对话不保存对话的上下文
 };
 
 // 用于保存需要动态修改的设置
@@ -46,6 +39,8 @@ export const setting = {
     maxImages: undefined,
     disableGroup: undefined,
     disableQQ: undefined,
+    enableGroup: undefined,
+    enableQQ: undefined,
     defaultModel: undefined,
 
     async init() {
@@ -63,19 +58,21 @@ export const setting = {
         this.defaultMode = ChatMode[emptyOr(global.db.get('defaultMode'), process.env.DEFAULT_MODE, CONSTANT.DEFAULT_MODE)];
         this.imageSize = emptyOr(global.db.get('imageSize'), parseInt(process.env.IMAGE_SIZE), CONSTANT.IMAGE_SIZE);
         this.maxImages = emptyOr(global.db.get('maxImages'), parseInt(process.env.MAX_IMAGES), CONSTANT.MAX_IMAGES);
-        if (!(this.imageSize in validImageSize)) {
+        if (!(this.imageSize in IMAGE_SIZE_USAGE)) {
             this.imageSize = CONSTANT.IMAGE_SIZE;
             logger('master').error(`非法的图片尺寸: ${this.imageSize}，使用默认值: ${CONSTANT.IMAGE_SIZE}`);
         }
         this.disableGroup = await readLineFile('disable_group.txt');
         this.disableQQ = await readLineFile('disable_qq.txt');
+        this.enableGroup = await readLineFile('enable_group.txt');
+        this.enableQQ = await readLineFile('enable_qq.txt');
         this.defaultModel = emptyOr(global.db.get('defaultModel'), process.env.DEFAULT_MODEL, CONSTANT.DEFAULT_MODEL);
     },
 
     async set(key: string, value: any) {
         switch (key) {
             case 'defaultChatMode':
-                this.defaultMode = ChatMode[value];
+                this.defaultMode = value;
                 await global.db.set(key, value);
                 break;
             case 'imageSize':

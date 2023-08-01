@@ -18,3 +18,10 @@ export const CONSTANT = {
     TIMEOUT: 60*1000,
     DEFAULT_MODEL: 'gpt-3.5-turbo',
 }
+
+export const IMAGE_SIZE_USAGE = {
+    0: 0,
+    256: 0.016,
+    512: 0.018,
+    1024: 0.020,
+}

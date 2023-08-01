@@ -1,8 +1,8 @@
 import { Configuration, OpenAIApi } from "openai";
 import { logger, readLineFile } from "./utils/utils.js";
-import { setting, validImageSize } from "./setting.js";
+import { setting } from "./setting.js";
 import HttpsProxyAgent from 'https-proxy-agent';
-import { CONSTANT } from "./utils/constant.js";
+import { CONSTANT, IMAGE_SIZE_USAGE } from "./utils/constant.js";
 
 export class GPT {
     private openai: OpenAIApi;
@@ -67,7 +67,7 @@ export class GPT {
             }, this.axiosConfig);
             return ({
                 url: data.data[0].url,
-                usage: validImageSize[setting.imageSize],
+                usage: IMAGE_SIZE_USAGE[setting.imageSize],
             });
         })
     }

@@ -61,18 +61,20 @@ const dealMessage = async (
     allowCommand: boolean = true,
     allowChat: boolean = true,
 ) => {
-    if (setting.enableQQ.length && !setting.enableQQ.includes(userId)) {
-        return null;
-    }
+    // 判断黑名单
     if (setting.disableQQ.includes(originData.user_id.toString())) {
         logger('master').debug(`用户${originData.user_id}是黑名单用户，拒绝响应`);
         return null;
     }
+    if (originData.group_id && setting.disableGroup.includes(originData.group_id.toString())) {
+        logger('master').debug(`群${originData.group_id}是黑名单群，拒绝响应`);
+        return null;
+    }
+    // 判断白名单（群消息需要判断QQ黑名单，而无需判断QQ白名单）
     if (originData.group_id && setting.enableGroup.length && !setting.enableGroup.includes(originData.group_id.toString())) {
         return null;
     }
-    if (originData.group_id && setting.disableGroup.includes(originData.group_id.toString())) {
-        logger('master').debug(`群${originData.group_id}是黑名单群，拒绝响应`);
+    if (!originData.group_id && setting.enableQQ.length && !setting.enableQQ.includes(userId)) {
         return null;
     }
     try {
